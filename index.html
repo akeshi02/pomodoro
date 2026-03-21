@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POMO — Focus Timer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0d0d;
+  --surface: #161616;
+  --surface2: #1e1e1e;
+  --surface3: #242424;
+  --border: #2a2a2a;
+  --accent: #e8c547;
+  --accent2: #e87b47;
+  --accent3: #47c5e8;
+  --accent4: #7de8a0;
+  --text: #f0ede4;
+  --text-muted: #666;
+  --text-dim: #3a3a3a;
+  --radius: 4px;
+  --session-color: #e8c547;
+  --session-rgb: 232,197,71;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:1000;opacity:0.35;}
+
+/* NAV TABS */
+.app-nav{width:100%;max-width:1100px;padding:28px 40px 0;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.logo{font-family:'DM Serif Display',serif;font-size:22px;letter-spacing:-0.5px;color:var(--accent);}
+.logo span{font-style:italic;color:var(--text-muted);font-size:14px;margin-left:8px;letter-spacing:0;}
+.nav-tabs{display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:3px;}
+.nav-tab{padding:7px 16px;background:none;border:none;border-radius:2px;color:var(--text-muted);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:all 0.18s;}
+.nav-tab:hover{color:var(--text);}
+.nav-tab.active{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+
+/* PAGES */
+.page{display:none;width:100%;max-width:1100px;padding:32px 40px 80px;}
+.page.active{display:block;}
+
+/* ─── TIMER PAGE ─── */
+.timer-layout{display:grid;grid-template-columns:1fr 310px;gap:24px;align-items:start;}
+
+.mode-tabs{display:flex;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:4px;overflow-x:auto;margin-bottom:20px;}
+.mode-tab{flex:1;min-width:max-content;padding:8px 14px;background:none;border:none;border-radius:2px;color:var(--text-muted);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:all 0.18s;white-space:nowrap;}
+.mode-tab:hover{color:var(--text);}
+.mode-tab.active{background:var(--session-color);color:#000;font-weight:500;}
+
+.timer-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:44px 40px;display:flex;flex-direction:column;align-items:center;gap:28px;position:relative;overflow:hidden;}
+.timer-wrap::before{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,var(--session-color) 0%,transparent 60%);opacity:0.04;pointer-events:none;transition:opacity 0.5s,background 0.5s;}
+.timer-wrap.running::before{opacity:0.09;}
+
+.timer-label{font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--session-color);transition:color 0.3s;}
+.timer-svg-wrap{position:relative;width:210px;height:210px;}
+.timer-svg{width:210px;height:210px;transform:rotate(-90deg);}
+.timer-track{fill:none;stroke:var(--border);stroke-width:3;}
+.timer-progress{fill:none;stroke:var(--session-color);stroke-width:3;stroke-linecap:round;stroke-dasharray:596;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear,stroke 0.3s;}
+.timer-digits{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;}
+.time-display{font-family:'DM Serif Display',serif;font-size:54px;letter-spacing:-3px;line-height:1;color:var(--text);font-variant-numeric:tabular-nums;}
+.session-count{font-size:10px;color:var(--text-muted);letter-spacing:0.1em;}
+
+.controls{display:flex;gap:10px;align-items:center;}
+.btn{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;border:1px solid var(--border);border-radius:var(--radius);background:none;color:var(--text-muted);padding:10px 16px;cursor:pointer;transition:all 0.18s;}
+.btn:hover{color:var(--text);border-color:#444;}
+.btn-primary{background:var(--session-color);border-color:var(--session-color);color:#000;padding:12px 36px;font-size:13px;font-weight:500;transition:all 0.18s;}
+.btn-primary:hover{opacity:0.85;}
+
+.sessions-row{display:flex;gap:6px;align-items:center;}
+.session-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:background 0.3s;}
+.session-dot.done{background:var(--session-color);}
+
+/* SHORTCUTS HINT */
+.shortcuts-hint{font-size:10px;color:var(--text-dim);letter-spacing:0.06em;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.shortcuts-hint kbd{background:var(--surface2);border:1px solid var(--border);border-radius:2px;padding:2px 5px;font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);}
+
+/* RIGHT PANEL */
+.right-panel{display:flex;flex-direction:column;gap:16px;position:sticky;top:32px;}
+.panel-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.panel-header{padding:13px 16px;border-bottom:1px solid var(--border);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-muted);display:flex;align-items:center;justify-content:space-between;}
+
+/* SETTINGS CARD */
+.settings-grid{padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+.setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.setting-label{font-size:11px;color:var(--text-muted);}
+.setting-input{background:var(--surface2);border:1px solid var(--border);border-radius:2px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;padding:5px 8px;width:64px;outline:none;text-align:center;transition:border-color 0.15s;}
+.setting-input:focus{border-color:var(--session-color);}
+
+/* TASK CARD */
+.task-add-row{display:flex;gap:6px;padding:10px;}
+.task-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:2px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;padding:7px 10px;outline:none;transition:border-color 0.15s;}
+.task-input:focus{border-color:var(--session-color);}
+.task-input::placeholder{color:var(--text-dim);}
+.btn-sm{background:var(--surface2);border:1px solid var(--border);border-radius:2px;color:var(--text-muted);font-family:'DM Mono',monospace;font-size:18px;width:32px;height:32px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;}
+.btn-sm:hover{color:var(--accent);border-color:var(--accent);}
+
+.tasks-list{max-height:200px;overflow-y:auto;padding:0 8px 8px;}
+.tasks-list::-webkit-scrollbar{width:3px;}
+.tasks-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+.task-item{display:flex;align-items:flex-start;gap:8px;padding:7px 6px;border-radius:2px;transition:background 0.15s;cursor:pointer;}
+.task-item:hover{background:var(--surface2);}
+.task-check{width:14px;height:14px;border:1px solid var(--border);border-radius:2px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:9px;transition:all 0.15s;}
+.task-item.done .task-check{background:var(--accent4);border-color:var(--accent4);color:#000;}
+.task-text{flex:1;font-size:11px;color:var(--text-muted);line-height:1.4;word-break:break-word;}
+.task-item.done .task-text{text-decoration:line-through;color:var(--text-dim);}
+.task-del{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:13px;padding:0;line-height:1;opacity:0;transition:all 0.15s;flex-shrink:0;}
+.task-item:hover .task-del{opacity:1;}
+.task-del:hover{color:var(--accent2);}
+.task-note-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:2px;color:var(--text);font-family:'DM Mono',monospace;font-size:10px;padding:6px 8px;outline:none;resize:none;margin-top:4px;transition:border-color 0.15s;display:none;}
+.task-note-input:focus{border-color:var(--session-color);}
+.task-note-input.show{display:block;}
+
+/* NOTES */
+.session-note-wrap{padding:10px;}
+.session-note{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:2px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;padding:8px 10px;outline:none;resize:vertical;min-height:70px;transition:border-color 0.15s;}
+.session-note:focus{border-color:var(--session-color);}
+.session-note::placeholder{color:var(--text-dim);}
+
+/* MUSIC CARD */
+.music-upload-zone{margin:10px;border:1px dashed var(--border);border-radius:2px;padding:18px;text-align:center;cursor:pointer;transition:all 0.18s;position:relative;}
+.music-upload-zone:hover,.music-upload-zone.drag-over{border-color:var(--accent3);background:rgba(71,197,232,0.04);}
+.music-upload-zone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{font-size:20px;margin-bottom:6px;}
+.upload-text{font-size:10px;color:var(--text-muted);line-height:1.5;}
+.upload-text span{color:var(--accent3);}
+
+.playlist{padding:0 8px 8px;max-height:150px;overflow-y:auto;}
+.playlist::-webkit-scrollbar{width:3px;}
+.playlist::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.track-item{display:flex;align-items:center;gap:7px;padding:6px 7px;border-radius:2px;cursor:pointer;transition:background 0.15s;}
+.track-item:hover{background:var(--surface2);}
+.track-item.active{background:rgba(71,197,232,0.08);}
+.track-num{font-size:10px;color:var(--text-dim);width:14px;text-align:right;flex-shrink:0;}
+.track-item.active .track-num{color:var(--accent3);}
+.track-name{flex:1;font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.track-item.active .track-name{color:var(--text);}
+.track-remove{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:12px;padding:0;opacity:0;transition:all 0.15s;line-height:1;}
+.track-item:hover .track-remove{opacity:1;}
+.track-remove:hover{color:var(--accent2);}
+
+.music-controls{padding:8px 12px 12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;}
+.now-playing{font-size:10px;color:var(--text-muted);}
+.now-playing-name{color:var(--accent3);display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.music-btns{display:flex;gap:5px;align-items:center;}
+.music-btn{background:var(--surface2);border:1px solid var(--border);border-radius:2px;color:var(--text-muted);font-size:12px;width:28px;height:28px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;}
+.music-btn:hover{color:var(--text);}
+.music-btn.loop-on{color:var(--accent3);border-color:var(--accent3);}
+.volume-row{display:flex;align-items:center;gap:8px;}
+.vol-icon{font-size:11px;color:var(--text-dim);}
+input[type="range"]{flex:1;height:2px;-webkit-appearance:none;background:var(--border);border-radius:2px;outline:none;cursor:pointer;}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;border-radius:50%;background:var(--accent3);cursor:pointer;}
+
+.autoplay-row{display:flex;align-items:center;gap:10px;padding:8px 14px 12px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted);}
+.toggle{width:30px;height:17px;background:var(--border);border-radius:9px;position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;border:none;}
+.toggle::after{content:'';position:absolute;top:2.5px;left:2.5px;width:12px;height:12px;border-radius:50%;background:var(--text-muted);transition:all 0.2s;}
+.toggle.on{background:var(--accent3);}
+.toggle.on::after{left:15.5px;background:#000;}
+
+/* CUSTOM MODES */
+.modes-list{padding:8px;display:flex;flex-direction:column;gap:3px;}
+.mode-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:2px;transition:background 0.15s;cursor:pointer;}
+.mode-item:hover{background:var(--surface2);}
+.mode-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.mode-info{flex:1;}
+.mode-name{font-size:11px;color:var(--text);}
+.mode-duration{font-size:10px;color:var(--text-muted);margin-top:1px;}
+.mode-delete{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:13px;padding:0 2px;line-height:1;transition:color 0.15s;opacity:0;}
+.mode-item:hover .mode-delete{opacity:1;}
+.mode-delete:hover{color:var(--accent2);}
+.add-mode-form{padding:10px;border-top:1px solid var(--border);display:flex;gap:6px;}
+.form-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:2px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;padding:7px 9px;outline:none;transition:border-color 0.15s;}
+.form-input:focus{border-color:var(--session-color);}
+.form-input::placeholder{color:var(--text-dim);}
+.form-input.narrow{width:60px;flex:none;}
+
+/* ─── HISTORY PAGE ─── */
+.history-layout{display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start;}
+
+.history-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.page-title{font-family:'DM Serif Display',serif;font-size:28px;letter-spacing:-1px;color:var(--text);}
+.page-subtitle{font-size:11px;color:var(--text-muted);margin-top:4px;letter-spacing:0.06em;}
+
+.stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+.stat-val{font-family:'DM Serif Display',serif;font-size:32px;color:var(--text);letter-spacing:-1px;}
+.stat-label{font-size:10px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:4px;}
+.stat-box.highlight .stat-val{color:var(--session-color);}
+
+.history-table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.history-table{width:100%;border-collapse:collapse;}
+.history-table th{padding:10px 16px;text-align:left;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);font-weight:400;}
+.history-table td{padding:10px 16px;font-size:11px;color:var(--text-muted);border-bottom:1px solid var(--border);}
+.history-table tr:last-child td{border-bottom:none;}
+.history-table td.date-col{color:var(--text);}
+.badge{display:inline-block;padding:2px 8px;border-radius:2px;font-size:10px;letter-spacing:0.08em;}
+.badge.focus{background:rgba(232,197,71,0.12);color:var(--accent);}
+.badge.break{background:rgba(71,197,232,0.12);color:var(--accent3);}
+.badge.custom{background:rgba(232,123,71,0.12);color:var(--accent2);}
+
+.history-empty{padding:40px;text-align:center;font-size:12px;color:var(--text-dim);}
+
+/* STREAK CALENDAR */
+.streak-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
+.streak-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;}
+.streak-num{font-family:'DM Serif Display',serif;font-size:42px;color:var(--accent2);letter-spacing:-2px;line-height:1;}
+.streak-info{font-size:10px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:4px;}
+.streak-best{text-align:right;}
+.streak-best-val{font-family:'DM Serif Display',serif;font-size:24px;color:var(--text-muted);letter-spacing:-1px;}
+.streak-best-label{font-size:10px;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;}
+
+.mini-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:12px;}
+.cal-day{aspect-ratio:1;border-radius:2px;background:var(--surface2);}
+.cal-day.has-session{background:rgba(232,197,71,0.3);}
+.cal-day.today{outline:1px solid var(--accent);outline-offset:1px;}
+.cal-day.streak-day{background:var(--accent2);opacity:0.7;}
+
+.daily-goal-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-top:16px;}
+.goal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.goal-title{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);}
+.goal-edit{background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-muted);font-family:'DM Mono',monospace;font-size:10px;padding:3px 8px;cursor:pointer;transition:all 0.15s;}
+.goal-edit:hover{color:var(--text);}
+.goal-progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:8px;}
+.goal-progress-fill{height:100%;background:var(--accent4);border-radius:2px;transition:width 0.5s ease;}
+.goal-text{font-size:11px;color:var(--text-muted);}
+.goal-text span{color:var(--text);}
+
+.export-btn{width:100%;margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-muted);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;padding:12px;cursor:pointer;transition:all 0.18s;}
+.export-btn:hover{color:var(--text);border-color:#444;}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:9px 18px;font-size:11px;color:var(--text-muted);letter-spacing:0.08em;opacity:0;transition:all 0.25s;pointer-events:none;z-index:9999;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ALARM MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;display:none;align-items:center;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;max-width:360px;width:90%;text-align:center;}
+.modal-icon{font-size:36px;margin-bottom:12px;}
+.modal-title{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:6px;}
+.modal-sub{font-size:11px;color:var(--text-muted);margin-bottom:20px;letter-spacing:0.06em;}
+.modal-btn{background:var(--session-color);border:none;border-radius:var(--radius);color:#000;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;padding:11px 28px;cursor:pointer;font-weight:500;transition:opacity 0.15s;}
+.modal-btn:hover{opacity:0.85;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+@media(max-width:800px){
+  .timer-layout,.history-layout{grid-template-columns:1fr;}
+  .app-nav{padding:20px 20px 0;flex-wrap:wrap;}
+  .page{padding:24px 20px 60px;}
+  .stats-strip{grid-template-columns:repeat(2,1fr);}
+  .right-panel{position:static;}
+  .time-display{font-size:46px;}
+}
+</style>
+</head>
+<body>
+
+<nav class="app-nav">
+  <div>
+    <div class="logo">POMO <span>focus timer</span></div>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('timer')">Timer</button>
+    <button class="nav-tab" onclick="showPage('history')">History</button>
+  </div>
+</nav>
+
+<!-- ══════════════ TIMER PAGE ══════════════ -->
+<div class="page active" id="page-timer">
+  <div class="timer-layout">
+
+    <!-- LEFT -->
+    <div>
+      <div class="mode-tabs" id="modeTabs"></div>
+
+      <div class="timer-wrap" id="timerWrap">
+        <div class="timer-label" id="timerLabel">FOCUS</div>
+        <div class="timer-svg-wrap">
+          <svg class="timer-svg" viewBox="0 0 210 210">
+            <circle class="timer-track" cx="105" cy="105" r="95"/>
+            <circle class="timer-progress" id="timerProgress" cx="105" cy="105" r="95"/>
+          </svg>
+          <div class="timer-digits">
+            <div class="time-display" id="timeDisplay">25:00</div>
+            <div class="session-count" id="sessionCount">SESSION 1 / 4</div>
+          </div>
+        </div>
+        <div class="sessions-row" id="sessionsRow"></div>
+        <div class="controls">
+          <button class="btn" onclick="resetTimer()">↺ RESET</button>
+          <button class="btn btn-primary" id="startBtn" onclick="toggleTimer()">START</button>
+          <button class="btn" onclick="skipSession()">SKIP ›</button>
+        </div>
+        <div class="shortcuts-hint">
+          <span><kbd>Space</kbd> start/pause</span>
+          <span><kbd>R</kbd> reset</span>
+          <span><kbd>S</kbd> skip</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right-panel">
+
+      <!-- Session Settings -->
+      <div class="panel-card">
+        <div class="panel-header">Settings</div>
+        <div class="settings-grid">
+          <div class="setting-row">
+            <span class="setting-label">Sessions per cycle</span>
+            <input class="setting-input" id="settingCycle" type="number" min="1" max="12" value="4" onchange="saveSetting('cycle',this.value);renderSessionDots();">
+          </div>
+          <div class="setting-row">
+            <span class="setting-label">Daily session goal</span>
+            <input class="setting-input" id="settingGoal" type="number" min="1" max="50" value="8" onchange="saveSetting('goal',this.value);renderGoal();">
+          </div>
+          <div class="setting-row">
+            <span class="setting-label">Alarm on complete</span>
+            <button class="toggle on" id="alarmToggle" onclick="toggleSetting('alarm',this)"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tasks -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <span>Tasks</span>
+          <span id="taskProgress" style="font-size:10px;color:var(--text-dim)">0/0</span>
+        </div>
+        <div class="task-add-row">
+          <input class="task-input" id="taskInput" placeholder="Add a task..." maxlength="80" onkeydown="if(event.key==='Enter')addTask()">
+          <button class="btn-sm" onclick="addTask()">+</button>
+        </div>
+        <div class="tasks-list" id="tasksList"></div>
+      </div>
+
+      <!-- Session Note -->
+      <div class="panel-card">
+        <div class="panel-header">Session Note</div>
+        <div class="session-note-wrap">
+          <textarea class="session-note" id="sessionNote" placeholder="What are you working on this session?" rows="3" oninput="saveNote()"></textarea>
+        </div>
+      </div>
+
+      <!-- Custom Modes -->
+      <div class="panel-card">
+        <div class="panel-header">Modes</div>
+        <div class="modes-list" id="modesList"></div>
+        <div class="add-mode-form">
+          <input class="form-input" id="newModeName" placeholder="Name" maxlength="18">
+          <input class="form-input narrow" id="newModeMins" type="number" min="1" max="180" placeholder="min">
+          <button class="btn-sm" onclick="addCustomMode()">+</button>
+        </div>
+      </div>
+
+      <!-- Music -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <span>Music</span>
+          <span style="font-size:9px;color:var(--text-dim)">plays while running</span>
+        </div>
+        <div class="music-upload-zone" id="dropZone">
+          <input type="file" id="musicFileInput" accept="audio/*" multiple onchange="handleFiles(this.files)">
+          <div class="upload-icon">♫</div>
+          <div class="upload-text">Drop audio or <span>browse</span></div>
+        </div>
+        <div class="playlist" id="playlist"></div>
+        <div class="music-controls" id="musicControls" style="display:none">
+          <div class="now-playing">NOW PLAYING<span class="now-playing-name" id="nowPlayingName">—</span></div>
+          <div class="music-btns">
+            <button class="music-btn" onclick="prevTrack()">◂</button>
+            <button class="music-btn" id="playPauseBtn" onclick="toggleMusicPlay()">▶</button>
+            <button class="music-btn" onclick="nextTrack()">▸</button>
+            <button class="music-btn" id="loopBtn" onclick="toggleLoop()">⟳</button>
+          </div>
+          <div class="volume-row">
+            <span class="vol-icon">♪</span>
+            <input type="range" id="volumeSlider" min="0" max="100" value="70" oninput="setVolume(this.value)">
+          </div>
+        </div>
+        <div class="autoplay-row">
+          <button class="toggle on" id="autoplayToggle" onclick="toggleAutoplay()"></button>
+          <span>Auto-play on start</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ HISTORY PAGE ══════════════ -->
+<div class="page" id="page-history">
+  <div class="history-layout">
+    <div>
+      <div class="history-header">
+        <div>
+          <div class="page-title">Session History</div>
+          <div class="page-subtitle">Your focus log</div>
+        </div>
+      </div>
+
+      <div class="stats-strip">
+        <div class="stat-box highlight">
+          <div class="stat-val" id="statToday">0</div>
+          <div class="stat-label">Today</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="statWeek">0</div>
+          <div class="stat-label">This Week</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="statTotal">0</div>
+          <div class="stat-label">All Time</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="statFocusTime">0h</div>
+          <div class="stat-label">Focus Time</div>
+        </div>
+      </div>
+
+      <div class="history-table-wrap">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Date & Time</th>
+              <th>Mode</th>
+              <th>Duration</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody"></tbody>
+        </table>
+        <div class="history-empty" id="historyEmpty">No sessions yet — start your first focus session!</div>
+      </div>
+    </div>
+
+    <div>
+      <!-- Streak -->
+      <div class="streak-card">
+        <div class="streak-top">
+          <div>
+            <div class="streak-num" id="streakNum">0</div>
+            <div class="streak-info">day streak 🔥</div>
+          </div>
+          <div class="streak-best">
+            <div class="streak-best-val" id="streakBest">0</div>
+            <div class="streak-best-label">best streak</div>
+          </div>
+        </div>
+        <div class="mini-cal" id="miniCal"></div>
+      </div>
+
+      <!-- Daily Goal -->
+      <div class="daily-goal-card">
+        <div class="goal-header">
+          <span class="goal-title">Daily Goal</span>
+        </div>
+        <div class="goal-progress-bar"><div class="goal-progress-fill" id="goalFill" style="width:0%"></div></div>
+        <div class="goal-text" id="goalText"><span>0</span> of <span id="goalTarget">8</span> sessions today</div>
+      </div>
+
+      <button class="export-btn" onclick="exportCSV()">↓ Export History as CSV</button>
+    </div>
+  </div>
+</div>
+
+<!-- ALARM MODAL -->
+<div class="modal-overlay" id="alarmModal">
+  <div class="modal">
+    <div class="modal-icon">⏰</div>
+    <div class="modal-title" id="modalTitle">Session Complete!</div>
+    <div class="modal-sub" id="modalSub">Take a well-deserved break.</div>
+    <button class="modal-btn" onclick="closeModal()">DISMISS</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<audio id="audioPlayer" preload="auto"></audio>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// CONSTANTS & STATE
+// ════════════════════════════════════════════════════════════
+const CIRC = 2 * Math.PI * 95; // r=95 → ~596.9
+
+const defaultModes = [
+  { id:'focus',    name:'Focus',       minutes:25, color:'#e8c547', type:'work'  },
+  { id:'short',    name:'Short Break', minutes:5,  color:'#47c5e8', type:'break' },
+  { id:'long',     name:'Long Break',  minutes:15, color:'#47e88c', type:'break' },
+];
+
+// LS helpers
+const LS = {
+  get:(k,d)=>{ try{ const v=localStorage.getItem(k); return v!==null?JSON.parse(v):d; }catch(e){return d;} },
+  set:(k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+};
+
+let customModes  = LS.get('pomo_custom_modes',[]);
+let allModes     = [];
+let currentModeId= 'focus';
+let timerInterval= null;
+let totalSeconds = 0;
+let remainingSeconds = 0;
+let isRunning    = false;
+let completedSessions = 0;
+
+// Settings
+let settings = LS.get('pomo_settings',{
+  cycle: 4, goal: 8, alarm: true, autoplay: true, volume: 70, loop: false
+});
+
+// Tasks
+let tasks = LS.get('pomo_tasks',[]);
+
+// Session history
+let history = LS.get('pomo_history',[]);
+
+// Music
+let tracks = [];
+let currentTrackIndex = -1;
+let isAudioPlaying = false;
+
+const audio = document.getElementById('audioPlayer');
+
+// ════════════════════════════════════════════════════════════
+// PAGE NAVIGATION
+// ════════════════════════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if(id==='history') renderHistory();
+}
+
+// ════════════════════════════════════════════════════════════
+// MODES
+// ════════════════════════════════════════════════════════════
+function buildModes(){ allModes=[...defaultModes,...customModes]; }
+
+function renderModeTabs(){
+  const el=document.getElementById('modeTabs');
+  el.innerHTML='';
+  allModes.forEach(m=>{
+    const b=document.createElement('button');
+    b.className='mode-tab'+(m.id===currentModeId?' active':'');
+    b.textContent=m.name;
+    b.onclick=()=>selectMode(m.id);
+    el.appendChild(b);
+  });
+}
+
+function renderModesList(){
+  const el=document.getElementById('modesList');
+  el.innerHTML='';
+  allModes.forEach(m=>{
+    const d=document.createElement('div');
+    d.className='mode-item';
+    d.innerHTML=`
+      <div class="mode-dot" style="background:${m.color}"></div>
+      <div class="mode-info"><div class="mode-name">${m.name}</div><div class="mode-duration">${m.minutes} min</div></div>
+      ${m.id.startsWith('custom_')?`<button class="mode-delete" onclick="deleteMode('${m.id}',event)">×</button>`:''}
+    `;
+    d.onclick=e=>{ if(!e.target.classList.contains('mode-delete')) selectMode(m.id); };
+    el.appendChild(d);
+  });
+}
+
+function selectMode(id){
+  if(isRunning){ showToast('Pause timer before switching'); return; }
+  currentModeId=id;
+  const m=allModes.find(x=>x.id===id); if(!m) return;
+  totalSeconds=m.minutes*60;
+  remainingSeconds=totalSeconds;
+  document.documentElement.style.setProperty('--session-color',m.color);
+  document.getElementById('timerLabel').textContent=m.name.toUpperCase();
+  renderModeTabs(); renderModesList(); updateDisplay(); updateProgress(1);
+}
+
+function addCustomMode(){
+  const name=document.getElementById('newModeName').value.trim();
+  const mins=parseInt(document.getElementById('newModeMins').value);
+  if(!name){ showToast('Enter a name'); return; }
+  if(!mins||mins<1||mins>180){ showToast('Enter valid minutes (1-180)'); return; }
+  const colors=['#e8a047','#a047e8','#e84747','#47e8b5','#e847b5','#e86747'];
+  const color=colors[customModes.length%colors.length];
+  const id='custom_'+Date.now();
+  customModes.push({id,name,minutes:mins,color,type:'custom'});
+  LS.set('pomo_custom_modes',customModes);
+  buildModes(); renderModeTabs(); renderModesList();
+  document.getElementById('newModeName').value='';
+  document.getElementById('newModeMins').value='';
+  showToast(`"${name}" added`);
+}
+
+function deleteMode(id,e){
+  e.stopPropagation();
+  customModes=customModes.filter(m=>m.id!==id);
+  LS.set('pomo_custom_modes',customModes);
+  buildModes();
+  if(currentModeId===id) selectMode('focus');
+  else { renderModeTabs(); renderModesList(); }
+  showToast('Mode deleted');
+}
+
+// ════════════════════════════════════════════════════════════
+// TIMER
+// ════════════════════════════════════════════════════════════
+function toggleTimer(){ isRunning?pauseTimer():startTimer(); }
+
+function startTimer(){
+  if(remainingSeconds<=0) return;
+  isRunning=true;
+  document.getElementById('startBtn').textContent='PAUSE';
+  document.getElementById('timerWrap').classList.add('running');
+  timerInterval=setInterval(tick,1000);
+  if(settings.autoplay&&tracks.length>0&&!isAudioPlaying) playAudio();
+}
+
+function pauseTimer(){
+  isRunning=false;
+  clearInterval(timerInterval);
+  document.getElementById('startBtn').textContent='RESUME';
+  document.getElementById('timerWrap').classList.remove('running');
+  if(isAudioPlaying) pauseAudio();
+}
+
+function resetTimer(){
+  pauseTimer();
+  isRunning=false;
+  document.getElementById('startBtn').textContent='START';
+  const m=allModes.find(x=>x.id===currentModeId);
+  totalSeconds=m.minutes*60;
+  remainingSeconds=totalSeconds;
+  updateDisplay(); updateProgress(1);
+}
+
+function tick(){
+  remainingSeconds--;
+  if(remainingSeconds<=0){
+    remainingSeconds=0;
+    updateDisplay(); updateProgress(0);
+    clearInterval(timerInterval);
+    isRunning=false;
+    document.getElementById('timerWrap').classList.remove('running');
+    document.getElementById('startBtn').textContent='START';
+    onSessionComplete();
+    return;
+  }
+  updateDisplay();
+  updateProgress(remainingSeconds/totalSeconds);
+}
+
+function skipSession(){
+  if(isRunning) pauseTimer();
+  onSessionComplete();
+}
+
+function onSessionComplete(){
+  const mode=allModes.find(m=>m.id===currentModeId);
+  const note=document.getElementById('sessionNote').value.trim();
+
+  // Save to history
+  const entry={
+    id: Date.now(),
+    ts: new Date().toISOString(),
+    mode: mode?.name||'Focus',
+    type: mode?.type||'work',
+    minutes: mode?.minutes||25,
+    note: note
+  };
+  history.unshift(entry);
+  LS.set('pomo_history',history);
+
+  completedSessions++;
+  renderSessionDots();
+  updateSessionCount();
+
+  // Alarm
+  if(settings.alarm){
+    playAlarm();
+    const isWork=(mode?.type==='work'||mode?.type==='custom');
+    document.getElementById('modalTitle').textContent=isWork?'Session Complete! 🎉':'Break Over!';
+    document.getElementById('modalSub').textContent=isWork?'Great focus! Time for a break.':'Ready to get back to work?';
+    document.getElementById('alarmModal').classList.add('show');
+  } else {
+    showToast(mode?.type==='work'?'Session complete! ☕':'Break over!');
+  }
+
+  // Auto next mode
+  if(mode?.type==='work'){
+    const cycle=parseInt(settings.cycle)||4;
+    const nextId=completedSessions%cycle===0?'long':'short';
+    const exists=allModes.find(m=>m.id===nextId);
+    if(exists) setTimeout(()=>selectMode(nextId),1000);
+  } else {
+    const exists=allModes.find(m=>m.id==='focus');
+    if(exists) setTimeout(()=>selectMode('focus'),1000);
+  }
+
+  // Clear note
+  document.getElementById('sessionNote').value='';
+  LS.set('pomo_session_note','');
+}
+
+function updateDisplay(){
+  const m=Math.floor(remainingSeconds/60);
+  const s=remainingSeconds%60;
+  document.getElementById('timeDisplay').textContent=
+    String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+
+function updateProgress(frac){
+  document.getElementById('timerProgress').style.strokeDashoffset=CIRC*(1-frac);
+}
+
+function updateSessionCount(){
+  const cycle=parseInt(settings.cycle)||4;
+  document.getElementById('sessionCount').textContent=
+    `SESSION ${completedSessions+1} / ${cycle}`;
+}
+
+function renderSessionDots(){
+  const row=document.getElementById('sessionsRow');
+  const cycle=parseInt(settings.cycle)||4;
+  row.innerHTML='';
+  for(let i=0;i<cycle;i++){
+    const d=document.createElement('div');
+    d.className='session-dot'+(i<completedSessions%cycle?' done':'');
+    row.appendChild(d);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// SETTINGS
+// ════════════════════════════════════════════════════════════
+function saveSetting(key,val){
+  settings[key]=isNaN(val)?val:parseFloat(val);
+  LS.set('pomo_settings',settings);
+}
+
+function toggleSetting(key,el){
+  settings[key]=!settings[key];
+  el.classList.toggle('on',settings[key]);
+  LS.set('pomo_settings',settings);
+}
+
+function toggleAutoplay(){
+  settings.autoplay=!settings.autoplay;
+  document.getElementById('autoplayToggle').classList.toggle('on',settings.autoplay);
+  LS.set('pomo_settings',settings);
+}
+
+function loadSettings(){
+  document.getElementById('settingCycle').value=settings.cycle||4;
+  document.getElementById('settingGoal').value=settings.goal||8;
+  document.getElementById('alarmToggle').classList.toggle('on',settings.alarm!==false);
+  document.getElementById('autoplayToggle').classList.toggle('on',settings.autoplay!==false);
+  document.getElementById('volumeSlider').value=settings.volume||70;
+  audio.volume=(settings.volume||70)/100;
+}
+
+// ════════════════════════════════════════════════════════════
+// TASKS
+// ════════════════════════════════════════════════════════════
+function addTask(){
+  const inp=document.getElementById('taskInput');
+  const text=inp.value.trim();
+  if(!text) return;
+  tasks.push({id:Date.now(),text,done:false,note:''});
+  LS.set('pomo_tasks',tasks);
+  inp.value='';
+  renderTasks();
+}
+
+function toggleTask(id){
+  const t=tasks.find(x=>x.id===id);
+  if(t){ t.done=!t.done; LS.set('pomo_tasks',tasks); renderTasks(); }
+}
+
+function deleteTask(id,e){
+  e.stopPropagation();
+  tasks=tasks.filter(x=>x.id!==id);
+  LS.set('pomo_tasks',tasks);
+  renderTasks();
+}
+
+function renderTasks(){
+  const el=document.getElementById('tasksList');
+  el.innerHTML='';
+  const prog=document.getElementById('taskProgress');
+  const done=tasks.filter(t=>t.done).length;
+  prog.textContent=tasks.length?`${done}/${tasks.length}`:'';
+
+  tasks.forEach(t=>{
+    const d=document.createElement('div');
+    d.className='task-item'+(t.done?' done':'');
+    d.innerHTML=`
+      <div class="task-check">${t.done?'✓':''}</div>
+      <div style="flex:1">
+        <div class="task-text">${escHtml(t.text)}</div>
+        <textarea class="task-note-input${t.note?' show':''}" placeholder="Note..." rows="2" onchange="updateTaskNote(${t.id},this.value)">${escHtml(t.note||'')}</textarea>
+      </div>
+      <button class="task-del" onclick="deleteTask(${t.id},event)">×</button>
+    `;
+    d.querySelector('.task-check').onclick=()=>toggleTask(t.id);
+    d.querySelector('.task-text').ondblclick=()=>{
+      const ta=d.querySelector('.task-note-input');
+      ta.classList.toggle('show');
+      if(ta.classList.contains('show')) ta.focus();
+    };
+    el.appendChild(d);
+  });
+}
+
+function updateTaskNote(id,val){
+  const t=tasks.find(x=>x.id===id);
+  if(t){ t.note=val; LS.set('pomo_tasks',tasks); }
+}
+
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ════════════════════════════════════════════════════════════
+// SESSION NOTE
+// ════════════════════════════════════════════════════════════
+function saveNote(){
+  LS.set('pomo_session_note',document.getElementById('sessionNote').value);
+}
+
+// ════════════════════════════════════════════════════════════
+// ALARM SOUND (Web Audio)
+// ════════════════════════════════════════════════════════════
+function playAlarm(){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const notes=[523.25,659.25,783.99,1046.5];
+    notes.forEach((freq,i)=>{
+      const osc=ctx.createOscillator();
+      const gain=ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type='sine';
+      osc.frequency.value=freq;
+      gain.gain.setValueAtTime(0,ctx.currentTime+i*0.18);
+      gain.gain.linearRampToValueAtTime(0.3,ctx.currentTime+i*0.18+0.04);
+      gain.gain.linearRampToValueAtTime(0,ctx.currentTime+i*0.18+0.22);
+      osc.start(ctx.currentTime+i*0.18);
+      osc.stop(ctx.currentTime+i*0.18+0.25);
+    });
+    setTimeout(()=>ctx.close(),1500);
+  }catch(e){}
+}
+
+function closeModal(){ document.getElementById('alarmModal').classList.remove('show'); }
+
+// ════════════════════════════════════════════════════════════
+// MUSIC
+// ════════════════════════════════════════════════════════════
+const dropZone=document.getElementById('dropZone');
+dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('drag-over');});
+dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('drag-over');handleFiles(e.dataTransfer.files);});
+
+function handleFiles(files){
+  let added=0;
+  Array.from(files).forEach(f=>{
+    if(f.type.startsWith('audio/')||/\.(mp3|wav|ogg|flac|m4a|aac)$/i.test(f.name)){
+      tracks.push({name:f.name.replace(/\.[^.]+$/,''),url:URL.createObjectURL(f)});
+      added++;
+    }
+  });
+  if(added){ renderPlaylist(); showToast(`${added} track${added>1?'s':''} added`); if(currentTrackIndex===-1){currentTrackIndex=0;loadTrack(0);} }
+}
+
+function renderPlaylist(){
+  const pl=document.getElementById('playlist');
+  const mc=document.getElementById('musicControls');
+  pl.innerHTML='';
+  mc.style.display=tracks.length?'flex':'none';
+  tracks.forEach((t,i)=>{
+    const d=document.createElement('div');
+    d.className='track-item'+(i===currentTrackIndex?' active':'');
+    d.innerHTML=`<span class="track-num">${i+1}</span><span class="track-name" title="${escHtml(t.name)}">${escHtml(t.name)}</span><button class="track-remove" onclick="removeTrack(${i},event)">×</button>`;
+    d.onclick=e=>{ if(!e.target.classList.contains('track-remove')) selectTrack(i); };
+    pl.appendChild(d);
+  });
+}
+
+function loadTrack(i){
+  if(i<0||i>=tracks.length) return;
+  currentTrackIndex=i;
+  audio.src=tracks[i].url;
+  audio.volume=(settings.volume||70)/100;
+  audio.loop=settings.loop||false;
+  document.getElementById('nowPlayingName').textContent=tracks[i].name;
+  renderPlaylist();
+}
+
+function selectTrack(i){ loadTrack(i); playAudio(); }
+
+function playAudio(){
+  if(currentTrackIndex===-1&&tracks.length>0) loadTrack(0);
+  if(currentTrackIndex===-1) return;
+  audio.play().then(()=>{ isAudioPlaying=true; document.getElementById('playPauseBtn').textContent='⏸'; }).catch(()=>{});
+}
+
+function pauseAudio(){
+  audio.pause();
+  isAudioPlaying=false;
+  document.getElementById('playPauseBtn').textContent='▶';
+}
+
+function toggleMusicPlay(){ isAudioPlaying?pauseAudio():playAudio(); }
+
+function nextTrack(){
+  if(!tracks.length) return;
+  loadTrack((currentTrackIndex+1)%tracks.length);
+  if(isAudioPlaying) playAudio();
+}
+
+function prevTrack(){
+  if(!tracks.length) return;
+  loadTrack((currentTrackIndex-1+tracks.length)%tracks.length);
+  if(isAudioPlaying) playAudio();
+}
+
+function toggleLoop(){
+  settings.loop=!settings.loop;
+  audio.loop=settings.loop;
+  document.getElementById('loopBtn').classList.toggle('loop-on',settings.loop);
+  LS.set('pomo_settings',settings);
+}
+
+function setVolume(v){
+  settings.volume=parseInt(v);
+  audio.volume=v/100;
+  LS.set('pomo_settings',settings);
+}
+
+function removeTrack(i,e){
+  e.stopPropagation();
+  URL.revokeObjectURL(tracks[i].url);
+  tracks.splice(i,1);
+  if(currentTrackIndex===i){ pauseAudio(); currentTrackIndex=tracks.length>0?Math.min(i,tracks.length-1):-1; if(currentTrackIndex>=0) loadTrack(currentTrackIndex); }
+  else if(currentTrackIndex>i) currentTrackIndex--;
+  renderPlaylist();
+}
+
+audio.addEventListener('ended',()=>{
+  if(!settings.loop){
+    if(currentTrackIndex<tracks.length-1) nextTrack();
+    else{ isAudioPlaying=false; document.getElementById('playPauseBtn').textContent='▶'; }
+  }
+});
+
+// ════════════════════════════════════════════════════════════
+// HISTORY PAGE
+// ════════════════════════════════════════════════════════════
+function renderHistory(){
+  renderStats();
+  renderTable();
+  renderStreak();
+  renderGoal();
+}
+
+function todayStr(){ return new Date().toISOString().split('T')[0]; }
+
+function renderStats(){
+  const today=todayStr();
+  const weekAgo=new Date(Date.now()-7*86400000).toISOString();
+  const todaySessions=history.filter(h=>h.ts.startsWith(today)&&h.type==='work');
+  const weekSessions=history.filter(h=>h.ts>=weekAgo&&h.type==='work');
+  const focusMins=history.filter(h=>h.type==='work').reduce((a,b)=>a+(b.minutes||25),0);
+
+  document.getElementById('statToday').textContent=todaySessions.length;
+  document.getElementById('statWeek').textContent=weekSessions.length;
+  document.getElementById('statTotal').textContent=history.filter(h=>h.type==='work').length;
+  const hrs=Math.floor(focusMins/60);
+  const mins=focusMins%60;
+  document.getElementById('statFocusTime').textContent=hrs?`${hrs}h${mins?mins+'m':''}`:focusMins+'m';
+}
+
+function renderTable(){
+  const tbody=document.getElementById('historyTableBody');
+  const empty=document.getElementById('historyEmpty');
+  tbody.innerHTML='';
+  if(!history.length){ empty.style.display='block'; return; }
+  empty.style.display='none';
+  history.slice(0,50).forEach(h=>{
+    const d=new Date(h.ts);
+    const dateStr=d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+    const timeStr=d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    const badgeCls=h.type==='work'?'focus':h.type==='break'?'break':'custom';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="date-col">${dateStr} <span style="color:var(--text-muted)">${timeStr}</span></td>
+      <td><span class="badge ${badgeCls}">${escHtml(h.mode)}</span></td>
+      <td>${h.minutes||25} min</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(h.note||'')}">${h.note?escHtml(h.note):'<span style="color:var(--text-dim)">—</span>'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderStreak(){
+  const workDays=[...new Set(history.filter(h=>h.type==='work').map(h=>h.ts.split('T')[0]))].sort();
+  // Current streak
+  let streak=0, best=0, cur=0;
+  const today=new Date(); today.setHours(0,0,0,0);
+  for(let i=workDays.length-1;i>=0;i--){
+    const d=new Date(workDays[i]+'T00:00:00');
+    const diff=Math.round((today-d)/86400000);
+    if(i===workDays.length-1&&diff>1) break;
+    if(i<workDays.length-1){
+      const prev=new Date(workDays[i+1]+'T00:00:00');
+      const gap=Math.round((prev-d)/86400000);
+      if(gap>1) break;
+    }
+    streak++;
+  }
+  // Best streak
+  let tmp=1;
+  for(let i=1;i<workDays.length;i++){
+    const a=new Date(workDays[i-1]+'T00:00:00'),b=new Date(workDays[i]+'T00:00:00');
+    if(Math.round((b-a)/86400000)===1) tmp++;
+    else tmp=1;
+    if(tmp>best) best=tmp;
+  }
+  if(streak>best) best=streak;
+
+  document.getElementById('streakNum').textContent=streak;
+  document.getElementById('streakBest').textContent=best||streak;
+
+  // Mini calendar — last 35 days
+  const cal=document.getElementById('miniCal');
+  cal.innerHTML='';
+  const todayStr2=new Date().toISOString().split('T')[0];
+  for(let i=34;i>=0;i--){
+    const d=new Date(Date.now()-i*86400000);
+    const ds=d.toISOString().split('T')[0];
+    const div=document.createElement('div');
+    div.className='cal-day'+(workDays.includes(ds)?' has-session':'')+(ds===todayStr2?' today':'');
+    div.title=ds;
+    cal.appendChild(div);
+  }
+}
+
+function renderGoal(){
+  const goal=parseInt(settings.goal)||8;
+  const today=todayStr();
+  const done=history.filter(h=>h.ts.startsWith(today)&&h.type==='work').length;
+  const pct=Math.min(100,Math.round((done/goal)*100));
+  document.getElementById('goalFill').style.width=pct+'%';
+  document.getElementById('goalTarget').textContent=goal;
+  document.getElementById('goalText').innerHTML=`<span style="color:var(--text)">${done}</span> of <span id="goalTarget">${goal}</span> sessions today${done>=goal?' 🎉':''}`;
+}
+
+// ════════════════════════════════════════════════════════════
+// EXPORT CSV
+// ════════════════════════════════════════════════════════════
+function exportCSV(){
+  if(!history.length){ showToast('No history to export'); return; }
+  const rows=[['Date','Time','Mode','Type','Duration (min)','Note']];
+  history.forEach(h=>{
+    const d=new Date(h.ts);
+    rows.push([
+      d.toLocaleDateString('en-GB'),
+      d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
+      h.mode, h.type, h.minutes||25,
+      `"${(h.note||'').replace(/"/g,'""')}"`
+    ]);
+  });
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='pomo-history-'+todayStr()+'.csv';
+  a.click();
+  showToast('CSV exported!');
+}
+
+// ════════════════════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ════════════════════════════════════════════════════════════
+document.addEventListener('keydown',e=>{
+  if(['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
+  if(e.code==='Space'){ e.preventDefault(); toggleTimer(); }
+  if(e.code==='KeyR'){ e.preventDefault(); resetTimer(); }
+  if(e.code==='KeyS'){ e.preventDefault(); skipSession(); }
+});
+
+// ════════════════════════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════════════════════════
+let toastTmr;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTmr);
+  toastTmr=setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+// ════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════
+buildModes();
+renderModeTabs();
+renderModesList();
+loadSettings();
+renderSessionDots();
+updateSessionCount();
+selectMode('focus');
+renderTasks();
+renderPlaylist();
+
+// Restore note
+const savedNote=LS.get('pomo_session_note','');
+if(savedNote) document.getElementById('sessionNote').value=savedNote;
+</script>
+</body>
+</html>
