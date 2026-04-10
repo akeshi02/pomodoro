@@ -1,9 +1,29 @@
+
 ```markdown
-# 🍅 Pomodoro Timer
+<p align="center">
+  <a href="https://github.com/akeshi02/pomodoro">
+    <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=40&duration=3000&pause=1000&color=F78044&center=true&vCenter=true&width=500&lines=%F0%9F%8D%85+Pomodoro+Timer;Boost+Your+Productivity!" alt="Typing SVG" />
+  </a>
+</p>
 
-A clean and intuitive Pomodoro Timer application designed to boost productivity using the Pomodoro Technique.
+<p align="center">
+    <img src="https://img.shields.io/badge/Status-Active-brightgreen?style=for-the-badge" alt="Status">
+    <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License">
+    <img src="https://img.shields.io/badge/Version-1.0.0-orange?style=for-the-badge" alt="Version">
+</p>
 
-![Pomodoro Timer Screenshot](https://via.placeholder.com/600x400?text=Add+Your+Screenshot+Here)
+<p align="center">
+  A clean and intuitive Pomodoro Timer application designed to boost productivity using the Pomodoro Technique.
+</p>
+
+---
+
+## 🎬 Demo
+
+<!-- RECORD A GIF OF YOUR APP AND UPLOAD IT TO THE REPO, THEN REPLACE THE LINK BELOW -->
+<p align="center">
+  <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjJqemN3amE5Z2Z4d2x5eno1d3N4eWNrZ3J4Z2Z5eWNrZ3J4Z2Z5eWNr/giphy.gif" alt="Pomodoro Timer Demo GIF" width="600">
+</p>
 
 ---
 
@@ -92,10 +112,12 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 akeshi02 - [GitHub Profile](https://github.com/akeshi02)
 
 Project Link: [https://github.com/akeshi02/pomodoro](https://github.com/akeshi02/pomodoro)
+
+---
+
+<p align="center">
+  Made with ❤️ and ☕
+</p>
 ```
 
 ***
-
-### 💡 A few tips to make it perfect:
-* **Screenshot:** Take a screenshot of your working Pomodoro app, upload it to the repo (or use a site like Imgur), and replace the `https://via.placeholder.com/600x400...` link with the link to your image. People love seeing what the app looks like before they download it!
-* **Tech Stack / Commands:** Make sure to change `[e.g., Node.js]` and `npm install` to whatever language/framework your project actually uses. If it's just a basic HTML/CSS/JS project, you can delete the `npm install` part and just say "Open `index.html` in your browser."
