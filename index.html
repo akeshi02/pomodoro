@@ -1,2112 +1,473 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hogwarts Focus — Spellcasting Timer</title>
-<link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=Uncial+Antiqua&display=swap" rel="stylesheet">
-<style>
-/* ═══════════════════════════════════════════
-   HOGWARTS FOCUS — CSS VARIABLES & RESET
-═══════════════════════════════════════════ */
-:root {
-  --bg: #0a0810;
-  --castle: #0e0b18;
-  --stone: #13101f;
-  --stone2: #1a1628;
-  --stone3: #221d33;
-  --border: #2e2848;
-  --border2: #3d3660;
-  --gold: #c9963a;
-  --gold2: #e8b84b;
-  --gold3: #f5d882;
-  --gold-dim: #6b4e18;
-  --crimson: #8b1a1a;
-  --crimson2: #b52020;
-  --scarlet: #d4372a;
-  --silver: #8a8fa8;
-  --silver2: #b0b5cc;
-  --purple: #3d2060;
-  --purple2: #5a3090;
-  --purple3: #7a50b8;
-  --blue: #1a2860;
-  --blue2: #2a3d8c;
-  --parchment: #d4bc8a;
-  --parchment2: #e8d4a8;
-  --ink: #c0b090;
-  --text: #e8dfc0;
-  --text-muted: #8a7a60;
-  --text-dim: #4a3d2a;
-  --candle: #ffb347;
-  --candle2: #ff8c00;
-  --magic: #a060ff;
-  --magic2: #c090ff;
-  --session-color: #c9963a;
-  --session-rgb: 201,150,58;
-  --house-primary: #740001;
-  --house-secondary: #ae0001;
-  --house-accent: #d3a625;
-}
-
-@keyframes flicker {
-  0%,100%{opacity:1;transform:scaleY(1) translateX(0);}
-  25%{opacity:.9;transform:scaleY(1.05) translateX(1px);}
-  50%{opacity:.95;transform:scaleY(.97) translateX(-1px);}
-  75%{opacity:.88;transform:scaleY(1.03) translateX(0.5px);}
-}
-@keyframes float-star {
-  0%{opacity:0;transform:translateY(0) scale(0);}
-  20%{opacity:1;transform:translateY(-20px) scale(1);}
-  80%{opacity:.6;transform:translateY(var(--fy)) scale(.8);}
-  100%{opacity:0;transform:translateY(var(--fy2)) scale(0);}
-}
-@keyframes owl-fly {
-  0%{transform:translateX(-120px) translateY(0);}
-  50%{transform:translateX(calc(100vw + 120px)) translateY(-40px);}
-  100%{transform:translateX(calc(100vw + 120px)) translateY(-40px);}
-}
-@keyframes candle-glow {
-  0%,100%{box-shadow:0 0 8px 2px rgba(255,179,71,.5),0 0 20px 6px rgba(255,140,0,.2);}
-  50%{box-shadow:0 0 14px 4px rgba(255,200,100,.7),0 0 30px 10px rgba(255,140,0,.35);}
-}
-@keyframes spell-cast {
-  0%{transform:scale(1);filter:brightness(1);}
-  30%{transform:scale(1.04);filter:brightness(1.3) saturate(1.5);}
-  60%{transform:scale(.98);filter:brightness(.95);}
-  100%{transform:scale(1);filter:brightness(1);}
-}
-@keyframes rune-pulse {
-  0%,100%{opacity:.25;}
-  50%{opacity:.6;}
-}
-@keyframes magic-ring {
-  0%{transform:rotate(0deg);}
-  100%{transform:rotate(360deg);}
-}
-@keyframes float-up {
-  0%,100%{transform:translateY(0);}
-  50%{transform:translateY(-7px);}
-}
-@keyframes parchment-shimmer {
-  0%,100%{background-position:0% 50%;}
-  50%{background-position:100% 50%;}
-}
-@keyframes shooting-star {
-  0%{opacity:0;transform:translate(0,0) rotate(-45deg) scaleX(0);}
-  10%{opacity:1;transform:translate(-20px,20px) rotate(-45deg) scaleX(1);}
-  100%{opacity:0;transform:translate(var(--sx),var(--sy)) rotate(-45deg) scaleX(0.2);}
-}
-@keyframes snitch-fly {
-  0%{transform:translate(0,0) rotate(0deg);}
-  25%{transform:translate(30px,-20px) rotate(15deg);}
-  50%{transform:translate(-10px,-35px) rotate(-10deg);}
-  75%{transform:translate(-25px,-15px) rotate(5deg);}
-  100%{transform:translate(0,0) rotate(0deg);}
-}
-@keyframes page-entrance {
-  from{opacity:0;transform:translateY(20px);}
-  to{opacity:1;transform:translateY(0);}
-}
-@keyframes wax-drip {
-  0%,100%{transform:scaleY(1);}
-  50%{transform:scaleY(1.08) translateY(2px);}
-}
-@keyframes portrait-blink {
-  0%,90%,100%{transform:scaleY(1);}
-  93%,97%{transform:scaleY(0.05);}
-}
-
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior:smooth; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'IM Fell English', serif;
-  min-height: 100vh;
-  overflow-x: hidden;
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 21 L12 3 L15 12 L21 9 Z' fill='%23c9963a' opacity='0.9'/%3E%3C/svg%3E") 3 21, auto;
-}
-
-/* ═══ CASTLE BACKGROUND ═══ */
-.castle-bg {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-/* Night sky */
-.castle-bg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse at 30% 0%, rgba(58,32,96,0.5) 0%, transparent 40%),
-    radial-gradient(ellipse at 70% 10%, rgba(26,40,96,0.4) 0%, transparent 35%),
-    radial-gradient(ellipse at 50% 100%, rgba(10,8,20,1) 0%, transparent 50%),
-    linear-gradient(180deg, #050408 0%, #080612 25%, #0a0810 50%, #0d0b16 100%);
-}
-
-/* Castle silhouette towers */
-.castle-silhouette {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 220px;
-  background: #050408;
-}
-.castle-silhouette::before {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 220px;
-  background:
-    /* Main towers */
-    linear-gradient(to top, #050408 0px, #050408 180px, transparent 180px) 5% 0/60px 100% no-repeat,
-    linear-gradient(to top, #050408 0px, #050408 150px, transparent 150px) 8% 0/40px 100% no-repeat,
-    linear-gradient(to top, #050408 0px, #050408 200px, transparent 200px) 15% 0/80px 100% no-repeat,
-    linear-gradient(to top, #050408 0px, #050408 130px, transparent 130px) 20% 0/50px 100% no-repeat,
-    linear-gradient(to top, #050408 0px, #050408 170px, transparent 170px) 25% 0/70px 100% no-repeat,
-    linear-gradient(to top, #050408 0px, #050408 160px, transparent 160px) 60% 0/75px 100% no-repeat,
-    linear-gradient(to top, #050408 0px, #050408 190px, transparent 190px) 70% 0/55px 100% no-repeat,
-    linear-gradient(to top, #050408 0px, #050408 140px, transparent 140px) 75% 0/45px 100% no-repeat,
-    linear-gradient(to top, #050408 0px, #050408 210px, transparent 210px) 82% 0/65px 100% no-repeat,
-    linear-gradient(to top, #050408 0px, #050408 155px, transparent 155px) 88% 0/40px 100% no-repeat,
-    linear-gradient(to top, #050408 0px, #050408 175px, transparent 175px) 94% 0/50px 100% no-repeat,
-    /* Base wall */
-    linear-gradient(to top, #050408 0px, #050408 80px, transparent 80px) 0% 0/100% 100% no-repeat;
-}
-
-/* Castle windows glow */
-.castle-window {
-  position: absolute;
-  width: 6px;
-  height: 10px;
-  background: var(--candle);
-  border-radius: 3px 3px 0 0;
-  opacity: 0.6;
-  animation: flicker calc(2s + var(--offset)) ease-in-out infinite var(--delay);
-  box-shadow: 0 0 6px 2px rgba(255,179,71,0.4);
-}
-
-/* Stars */
-.star {
-  position: absolute;
-  background: white;
-  border-radius: 50%;
-  animation: float-star var(--dur) ease-in-out infinite var(--delay);
-}
-
-/* Shooting star */
-.shooting-star {
-  position: absolute;
-  height: 1px;
-  width: 80px;
-  background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.8));
-  border-radius: 2px;
-  animation: shooting-star var(--dur) ease-out infinite var(--delay);
-}
-
-/* Floating magic particles */
-.magic-particle {
-  position: absolute;
-  border-radius: 50%;
-  animation: float-star var(--dur) ease-in-out infinite var(--delay);
-}
-
-/* Golden Snitch */
-.snitch {
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  background: radial-gradient(circle at 35% 35%, #f5d882, #c9963a);
-  border-radius: 50%;
-  box-shadow: 0 0 8px 2px rgba(201,150,58,0.6);
-  animation: snitch-fly 8s ease-in-out infinite;
-  top: 20%;
-  right: 15%;
-  z-index: 2;
-}
-.snitch::before, .snitch::after {
-  content: '';
-  position: absolute;
-  width: 18px; height: 8px;
-  background: rgba(245,216,130,0.3);
-  border-radius: 50%;
-  top: 3px;
-  border: 1px solid rgba(245,216,130,0.4);
-}
-.snitch::before { left: -16px; transform: rotate(-30deg); }
-.snitch::after  { right: -16px; transform: rotate(30deg); }
-
-/* Owl */
-.owl {
-  position: absolute;
-  top: 12%;
-  left: 0;
-  font-size: 22px;
-  animation: owl-fly 28s ease-in-out infinite;
-  animation-delay: -8s;
-  z-index: 3;
-  filter: drop-shadow(0 0 4px rgba(255,255,200,0.3));
-}
-
-/* ═══ NAVIGATION ═══ */
-.app-nav {
-  position: relative;
-  z-index: 20;
-  width: 100%;
-  max-width: 1140px;
-  margin: 0 auto;
-  padding: 24px 40px 0;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.logo-block {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.logo-hogwarts {
-  font-family: 'Uncial Antiqua', serif;
-  font-size: 11px;
-  letter-spacing: 0.4em;
-  color: var(--gold);
-  text-transform: uppercase;
-  text-shadow: 0 0 10px rgba(201,150,58,0.5);
-  opacity: 0.8;
-}
-
-.logo-title {
-  font-family: 'Uncial Antiqua', serif;
-  font-size: 30px;
-  color: var(--gold2);
-  letter-spacing: 2px;
-  line-height: 1;
-  text-shadow:
-    0 0 20px rgba(201,150,58,0.6),
-    0 0 40px rgba(201,150,58,0.2),
-    0 2px 8px rgba(0,0,0,0.9);
-}
-
-.logo-subtitle {
-  font-family: 'IM Fell English', serif;
-  font-style: italic;
-  font-size: 13px;
-  color: var(--text-muted);
-  letter-spacing: 0.05em;
-}
-
-/* House crest badges */
-.house-crests {
-  display: flex;
-  gap: 8px;
-  margin-top: 6px;
-}
-
-.crest {
-  width: 22px; height: 22px;
-  border-radius: 2px;
-  border: 1px solid rgba(255,255,255,0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  cursor: pointer;
-  transition: all 0.2s;
-  opacity: 0.5;
-  position: relative;
-  overflow: hidden;
-}
-.crest:hover { opacity: 1; transform: scale(1.1); }
-.crest.active { opacity: 1; border-color: rgba(255,255,255,0.3); }
-.crest.gryffindor { background: linear-gradient(135deg, #740001, #ae0001); }
-.crest.slytherin  { background: linear-gradient(135deg, #1a3a1a, #2d6e2d); }
-.crest.ravenclaw  { background: linear-gradient(135deg, #0e1f4a, #1a3a7a); }
-.crest.hufflepuff { background: linear-gradient(135deg, #3a2d00, #6e5800); }
-
-.nav-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
-}
-
-.nav-tabs {
-  display: flex;
-  gap: 3px;
-  background: rgba(14,11,24,0.85);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 4px;
-  backdrop-filter: blur(8px);
-}
-
-.nav-tab {
-  padding: 8px 18px;
-  background: none;
-  border: 1px solid transparent;
-  border-radius: 3px;
-  color: var(--text-muted);
-  font-family: 'IM Fell English SC', serif;
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-  transition: all 0.25s;
-  white-space: nowrap;
-}
-.nav-tab:hover { color: var(--parchment); }
-.nav-tab.active {
-  background: linear-gradient(135deg, rgba(201,150,58,0.18), rgba(116,0,1,0.15));
-  border-color: var(--gold-dim);
-  color: var(--gold2);
-  text-shadow: 0 0 8px rgba(201,150,58,0.4);
-}
-
-/* ═══ PAGES ═══ */
-.page {
-  display: none;
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  max-width: 1140px;
-  margin: 0 auto;
-  padding: 28px 40px 80px;
-  animation: page-entrance 0.4s ease-out;
-}
-.page.active { display: block; }
-
-/* ═══ TIMER PAGE LAYOUT ═══ */
-.timer-layout {
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 24px;
-  align-items: start;
-}
-
-/* ═══ MODE TABS ═══ */
-.mode-tabs {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 18px;
-  background: rgba(10,8,16,0.8);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 5px;
-  backdrop-filter: blur(6px);
-}
-
-.mode-tab {
-  flex: 1;
-  min-width: max-content;
-  padding: 9px 14px;
-  background: none;
-  border: 1px solid transparent;
-  border-radius: 3px;
-  color: var(--text-muted);
-  font-family: 'IM Fell English SC', serif;
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-.mode-tab:hover { color: var(--parchment); background: rgba(201,150,58,0.05); }
-.mode-tab.active {
-  background: linear-gradient(135deg, rgba(201,150,58,0.2), rgba(116,0,1,0.15));
-  border-color: var(--gold-dim);
-  color: var(--gold2);
-  font-weight: 600;
-}
-
-/* ═══ THE GREAT TIMER SCROLL ═══ */
-.timer-scroll {
-  position: relative;
-  background: linear-gradient(160deg, #13101f 0%, #0e0b18 40%, #110e1c 100%);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 50px 40px 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
-  overflow: hidden;
-  box-shadow:
-    0 0 0 1px rgba(201,150,58,0.08),
-    0 12px 60px rgba(0,0,0,0.7),
-    inset 0 0 80px rgba(61,32,96,0.08),
-    inset 0 1px 0 rgba(201,150,58,0.12);
-}
-
-/* Decorative top border */
-.timer-scroll::before {
-  content: '⚡ ✦ 𝕳𝖔𝖌𝖜𝖆𝖗𝖙𝖘 ✦ ⚡';
-  position: absolute;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 10px;
-  color: var(--gold-dim);
-  letter-spacing: 6px;
-  white-space: nowrap;
-  font-family: 'IM Fell English SC', serif;
-}
-
-/* Subtle magic aura behind timer */
-.timer-scroll::after {
-  content: '';
-  position: absolute;
-  top: -50px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 500px; height: 350px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(var(--session-rgb), 0.06) 0%, transparent 65%);
-  pointer-events: none;
-  transition: background 0.5s;
-}
-.timer-scroll.running::after {
-  background: radial-gradient(ellipse, rgba(var(--session-rgb), 0.12) 0%, transparent 60%);
-}
-
-/* Corner decorations */
-.scroll-corner {
-  position: absolute;
-  font-size: 22px;
-  color: var(--gold-dim);
-  opacity: 0.4;
-  line-height: 1;
-  transition: opacity 0.3s;
-}
-.timer-scroll:hover .scroll-corner { opacity: 0.65; }
-.sc-tl { top: 10px; left: 16px; }
-.sc-tr { top: 10px; right: 16px; }
-.sc-bl { bottom: 10px; left: 16px; }
-.sc-br { bottom: 10px; right: 16px; }
-
-/* Candles */
-.candle-row {
-  display: flex;
-  gap: 60px;
-  position: absolute;
-  top: 36px;
-  left: 50%;
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-.candle {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-}
-.candle-flame {
-  width: 6px; height: 14px;
-  background: linear-gradient(to top, var(--candle2), var(--candle), #fff8dc);
-  border-radius: 50% 50% 20% 20%;
-  animation: flicker 1.8s ease-in-out infinite;
-  box-shadow: 0 0 8px 3px rgba(255,179,71,0.4), 0 0 20px 6px rgba(255,140,0,0.15);
-  position: relative;
-  z-index: 1;
-}
-.candle-body {
-  width: 5px; height: 22px;
-  background: linear-gradient(to bottom, #f0ebe0, #d4cfc0);
-  border-radius: 2px;
-  animation: wax-drip 3s ease-in-out infinite;
-}
-.candle-base {
-  width: 8px; height: 4px;
-  background: #b0a890;
-  border-radius: 1px;
-}
-
-.spell-label {
-  font-family: 'Uncial Antiqua', serif;
-  font-size: 12px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--gold2);
-  text-shadow: 0 0 12px rgba(201,150,58,0.5);
-  transition: color 0.4s;
-  margin-top: 12px;
-}
-
-/* ═══ TIMER RING ═══ */
-.timer-ring-wrap {
-  position: relative;
-  width: 230px;
-  height: 230px;
-  animation: float-up 4s ease-in-out infinite;
-}
-
-.timer-svg {
-  width: 230px;
-  height: 230px;
-  transform: rotate(-90deg);
-}
-
-.ring-track {
-  fill: none;
-  stroke: rgba(46,40,72,0.8);
-  stroke-width: 3;
-}
-
-.ring-runes {
-  fill: none;
-  stroke: rgba(201,150,58,0.12);
-  stroke-width: 1;
-  stroke-dasharray: 4 8;
-  animation: magic-ring 60s linear infinite;
-  transform-origin: 50% 50%;
-}
-
-.ring-glow {
-  fill: none;
-  stroke: rgba(var(--session-rgb), 0.15);
-  stroke-width: 12;
-  filter: blur(4px);
-  stroke-dasharray: 628;
-  stroke-dashoffset: 0;
-  transition: stroke-dashoffset 1s linear;
-}
-
-.ring-progress {
-  fill: none;
-  stroke: var(--session-color);
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-dasharray: 628;
-  stroke-dashoffset: 0;
-  transition: stroke-dashoffset 1s linear, stroke 0.4s;
-  filter: drop-shadow(0 0 5px var(--session-color)) drop-shadow(0 0 12px rgba(var(--session-rgb),0.4));
-}
-
-/* Tick marks */
-.ring-tick {
-  fill: none;
-  stroke: rgba(201,150,58,0.2);
-  stroke-width: 1.5;
-}
-
-.timer-digits {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-}
-
-/* House crest in center - subtle */
-.timer-crest {
-  font-size: 18px;
-  opacity: 0.12;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -70%);
-  pointer-events: none;
-}
-
-.time-display {
-  font-family: 'Uncial Antiqua', serif;
-  font-size: 54px;
-  letter-spacing: -2px;
-  line-height: 1;
-  color: var(--text);
-  text-shadow: 0 0 20px rgba(var(--session-rgb),0.3), 0 2px 6px rgba(0,0,0,0.8);
-  font-variant-numeric: tabular-nums;
-  position: relative;
-  z-index: 1;
-}
-
-.session-label {
-  font-family: 'IM Fell English SC', serif;
-  font-size: 10px;
-  color: var(--text-muted);
-  letter-spacing: 0.12em;
-}
-
-/* ═══ HOUSE POINTS ═══ */
-.house-points-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.hp-gem {
-  width: 16px; height: 16px;
-  border-radius: 50%;
-  background: var(--border);
-  transition: all 0.4s;
-  box-shadow: inset 0 1px 2px rgba(255,255,255,0.1);
-  position: relative;
-}
-.hp-gem::after {
-  content: '';
-  position: absolute;
-  top: 2px; left: 3px;
-  width: 5px; height: 4px;
-  background: rgba(255,255,255,0.15);
-  border-radius: 50%;
-}
-.hp-gem.earned {
-  background: radial-gradient(circle at 35% 35%, var(--gold3), var(--gold));
-  box-shadow: 0 0 8px var(--gold), 0 0 16px rgba(201,150,58,0.3), inset 0 1px 2px rgba(255,255,255,0.2);
-}
-
-/* ═══ CONTROLS ═══ */
-.controls {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.btn {
-  font-family: 'IM Fell English SC', serif;
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: rgba(14,11,24,0.8);
-  color: var(--text-muted);
-  padding: 10px 18px;
-  cursor: pointer;
-  transition: all 0.2s;
-  position: relative;
-  overflow: hidden;
-}
-.btn::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.03), transparent);
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-.btn:hover { color: var(--parchment); border-color: var(--border2); }
-.btn:hover::after { opacity: 1; }
-
-.btn-cast {
-  background: linear-gradient(135deg, #4a1a0a, #6e2510, #4a1a0a);
-  border: 1px solid #8b3a1a;
-  color: #f5c090;
-  padding: 13px 42px;
-  font-size: 13px;
-  font-family: 'Uncial Antiqua', serif;
-  letter-spacing: 0.15em;
-  text-shadow: 0 0 8px rgba(245,192,144,0.5);
-  box-shadow:
-    0 0 20px rgba(139,58,26,0.3),
-    0 0 40px rgba(139,58,26,0.1),
-    inset 0 1px 0 rgba(255,200,160,0.1);
-}
-.btn-cast:hover {
-  background: linear-gradient(135deg, #6e2510, #903015, #6e2510);
-  box-shadow: 0 0 30px rgba(180,80,40,0.5), inset 0 1px 0 rgba(255,200,160,0.15);
-  border-color: #c05020;
-  color: #ffd0a0;
-}
-
-/* ═══ SPELLBOOK SHORTCUTS ═══ */
-.spellbook-hint {
-  font-family: 'IM Fell English', serif;
-  font-style: italic;
-  font-size: 11px;
-  color: var(--text-dim);
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-.spellbook-hint kbd {
-  background: rgba(46,40,72,0.5);
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  padding: 2px 5px;
-  font-family: 'IM Fell English SC', serif;
-  font-size: 9px;
-  color: var(--silver);
-  font-style: normal;
-}
-
-/* ═══ RIGHT PANEL ═══ */
-.right-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  position: sticky;
-  top: 28px;
-}
-
-/* PANEL CARDS — styled as old books/scrolls */
-.panel-card {
-  background: linear-gradient(150deg, #13101f, #0f0c1a);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  overflow: hidden;
-  box-shadow:
-    0 4px 24px rgba(0,0,0,0.5),
-    0 0 0 1px rgba(201,150,58,0.04),
-    inset 0 1px 0 rgba(201,150,58,0.06);
-  position: relative;
-}
-
-/* Top gold line */
-.panel-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(201,150,58,0.4) 50%, transparent 100%);
-}
-
-.panel-header {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
-  font-family: 'IM Fell English SC', serif;
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  color: var(--gold);
-  text-shadow: 0 0 8px rgba(201,150,58,0.3);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.panel-header .ph-icon { font-size: 13px; opacity: 0.8; margin-right: 6px; }
-
-/* ═══ SETTINGS ═══ */
-.settings-grid { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
-.setting-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.setting-label {
-  font-family: 'IM Fell English', serif;
-  font-style: italic;
-  font-size: 12px;
-  color: var(--text-muted);
-}
-.setting-input {
-  background: rgba(6,5,12,0.8);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  color: var(--gold2);
-  font-family: 'Uncial Antiqua', serif;
-  font-size: 11px;
-  padding: 5px 8px;
-  width: 66px;
-  outline: none;
-  text-align: center;
-  transition: border-color 0.2s;
-}
-.setting-input:focus { border-color: var(--gold-dim); box-shadow: 0 0 8px rgba(201,150,58,0.15); }
-
-/* ═══ SPELL LIST (TASKS) ═══ */
-.task-add-row { display: flex; gap: 6px; padding: 10px; }
-.task-input {
-  flex: 1;
-  background: rgba(6,5,12,0.7);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  color: var(--text);
-  font-family: 'IM Fell English', serif;
-  font-style: italic;
-  font-size: 12px;
-  padding: 7px 10px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-.task-input:focus { border-color: var(--gold-dim); }
-.task-input::placeholder { color: var(--text-dim); }
-
-.btn-sm {
-  background: rgba(60,20,10,0.8);
-  border: 1px solid #6b3018;
-  border-radius: 3px;
-  color: #f5c090;
-  font-size: 17px;
-  width: 32px; height: 32px;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex; align-items: center; justify-content: center;
-  line-height: 1;
-}
-.btn-sm:hover { background: rgba(100,35,15,0.8); border-color: #c05020; box-shadow: 0 0 8px rgba(180,80,40,0.25); }
-
-.tasks-list { max-height: 200px; overflow-y: auto; padding: 0 8px 8px; }
-.tasks-list::-webkit-scrollbar { width: 3px; }
-.tasks-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-.task-item { display: flex; align-items: flex-start; gap: 8px; padding: 7px 6px; border-radius: 3px; transition: background 0.15s; cursor: pointer; }
-.task-item:hover { background: rgba(46,40,72,0.25); }
-
-.task-check {
-  width: 14px; height: 14px;
-  background: var(--border);
-  border-radius: 2px;
-  flex-shrink: 0;
-  margin-top: 2px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 9px;
-  transition: all 0.25s;
-  border: 1px solid rgba(201,150,58,0.1);
-}
-.task-item.done .task-check { background: var(--gold); color: #1a0a00; border-color: var(--gold2); box-shadow: 0 0 6px rgba(201,150,58,0.4); }
-
-.task-text { flex: 1; font-family: 'IM Fell English', serif; font-style: italic; font-size: 12px; color: var(--text-muted); line-height: 1.4; word-break: break-word; }
-.task-item.done .task-text { text-decoration: line-through; color: var(--text-dim); }
-
-.task-del { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 13px; padding: 0; line-height: 1; opacity: 0; transition: all 0.15s; flex-shrink: 0; }
-.task-item:hover .task-del { opacity: 1; }
-.task-del:hover { color: var(--scarlet); }
-
-.task-note-input {
-  width: 100%;
-  background: rgba(6,5,12,0.6);
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  color: var(--ink);
-  font-family: 'IM Fell English', serif;
-  font-style: italic;
-  font-size: 11px;
-  padding: 5px 7px;
-  outline: none;
-  resize: none;
-  margin-top: 4px;
-  transition: border-color 0.15s;
-  display: none;
-}
-.task-note-input:focus { border-color: var(--gold-dim); }
-.task-note-input.show { display: block; }
-
-/* ═══ PARCHMENT NOTE ═══ */
-.note-wrap { padding: 10px; }
-.parchment-note {
-  width: 100%;
-  background:
-    repeating-linear-gradient(
-      transparent,
-      transparent 22px,
-      rgba(201,150,58,0.06) 22px,
-      rgba(201,150,58,0.06) 23px
-    ),
-    linear-gradient(160deg, rgba(8,6,14,0.9), rgba(12,9,20,0.95));
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  color: var(--parchment);
-  font-family: 'IM Fell English', serif;
-  font-style: italic;
-  font-size: 12px;
-  padding: 9px 10px;
-  outline: none;
-  resize: vertical;
-  min-height: 70px;
-  line-height: 23px;
-  transition: border-color 0.2s;
-}
-.parchment-note:focus { border-color: var(--gold-dim); }
-.parchment-note::placeholder { color: var(--text-dim); }
-
-/* ═══ SPELLBOOK (MODES) ═══ */
-.modes-list { padding: 8px; display: flex; flex-direction: column; gap: 3px; }
-.mode-item { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 3px; transition: background 0.15s; cursor: pointer; }
-.mode-item:hover { background: rgba(46,40,72,0.25); }
-.mode-pip { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 4px currentColor; }
-.mode-info { flex: 1; }
-.mode-name { font-family: 'IM Fell English SC', serif; font-size: 11px; color: var(--parchment); }
-.mode-duration { font-size: 10px; color: var(--text-muted); margin-top: 1px; font-style: italic; }
-.mode-delete { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 13px; padding: 0 2px; line-height: 1; transition: color 0.15s; opacity: 0; }
-.mode-item:hover .mode-delete { opacity: 1; }
-.mode-delete:hover { color: var(--scarlet); }
-
-.add-mode-form { padding: 10px; border-top: 1px solid var(--border); display: flex; gap: 6px; }
-.form-input {
-  flex: 1;
-  background: rgba(6,5,12,0.7);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  color: var(--text);
-  font-family: 'IM Fell English', serif;
-  font-size: 12px;
-  padding: 7px 9px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-.form-input:focus { border-color: var(--gold-dim); }
-.form-input::placeholder { color: var(--text-dim); font-style: italic; }
-.form-input.narrow { width: 60px; flex: none; }
-
-/* ═══ MUSIC / WIZARDING WIRELESS ═══ */
-.music-upload-zone {
-  margin: 10px;
-  border: 1px dashed var(--border);
-  border-radius: 4px;
-  padding: 18px 14px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  position: relative;
-  background: rgba(6,5,12,0.3);
-}
-.music-upload-zone:hover, .music-upload-zone.drag-over {
-  border-color: var(--gold-dim);
-  background: rgba(201,150,58,0.04);
-}
-.music-upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-.upload-icon { font-size: 22px; margin-bottom: 5px; }
-.upload-text { font-family: 'IM Fell English', serif; font-style: italic; font-size: 12px; color: var(--text-muted); line-height: 1.5; }
-.upload-text span { color: var(--gold); }
-
-.playlist { padding: 0 8px 8px; max-height: 140px; overflow-y: auto; }
-.playlist::-webkit-scrollbar { width: 3px; }
-.playlist::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-.track-item { display: flex; align-items: center; gap: 7px; padding: 6px 7px; border-radius: 2px; cursor: pointer; transition: background 0.15s; }
-.track-item:hover { background: rgba(46,40,72,0.25); }
-.track-item.active { background: rgba(201,150,58,0.08); }
-.track-num { font-family: 'IM Fell English SC', serif; font-size: 9px; color: var(--text-dim); width: 14px; text-align: right; flex-shrink: 0; }
-.track-item.active .track-num { color: var(--gold2); }
-.track-name { flex: 1; font-family: 'IM Fell English', serif; font-style: italic; font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.track-item.active .track-name { color: var(--parchment2); }
-.track-remove { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 12px; padding: 0; opacity: 0; transition: all 0.15s; line-height: 1; }
-.track-item:hover .track-remove { opacity: 1; }
-.track-remove:hover { color: var(--scarlet); }
-
-.music-controls { padding: 8px 12px 12px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
-.now-playing { font-family: 'IM Fell English SC', serif; font-size: 9px; letter-spacing: 0.14em; color: var(--text-muted); }
-.now-playing-name { color: var(--gold); display: block; font-family: 'IM Fell English', serif; font-style: italic; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; letter-spacing: 0; }
-.music-btns { display: flex; gap: 5px; align-items: center; }
-.music-btn { background: rgba(30,15,5,0.7); border: 1px solid var(--border); border-radius: 3px; color: var(--text-muted); font-size: 12px; width: 28px; height: 28px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
-.music-btn:hover { color: var(--gold2); border-color: var(--gold-dim); }
-.music-btn.loop-on { color: var(--gold2); border-color: var(--gold-dim); background: rgba(80,40,10,0.4); }
-.volume-row { display: flex; align-items: center; gap: 8px; }
-.vol-icon { font-size: 11px; color: var(--text-dim); }
-input[type="range"] { flex: 1; height: 2px; -webkit-appearance: none; background: var(--border); border-radius: 2px; outline: none; cursor: pointer; }
-input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%; background: var(--gold2); cursor: pointer; box-shadow: 0 0 6px rgba(201,150,58,0.4); }
-
-.autoplay-row { display: flex; align-items: center; gap: 10px; padding: 8px 14px 12px; border-top: 1px solid var(--border); font-family: 'IM Fell English', serif; font-style: italic; font-size: 12px; color: var(--text-muted); }
-.toggle { width: 30px; height: 17px; background: var(--border); border-radius: 9px; position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; border: none; }
-.toggle::after { content: ''; position: absolute; top: 2.5px; left: 2.5px; width: 12px; height: 12px; border-radius: 50%; background: var(--text-muted); transition: all 0.2s; }
-.toggle.on { background: var(--gold-dim); border: 1px solid var(--gold); }
-.toggle.on::after { left: 15.5px; background: var(--gold2); }
-
-/* ═══ HISTORY / TOME OF RECORDS ═══ */
-.history-layout { display: grid; grid-template-columns: 1fr 310px; gap: 24px; align-items: start; }
-
-.tome-title { font-family: 'Uncial Antiqua', serif; font-size: 28px; color: var(--gold2); letter-spacing: 2px; text-shadow: 0 0 20px rgba(201,150,58,0.35); margin-bottom: 4px; }
-.tome-subtitle { font-family: 'IM Fell English', serif; font-style: italic; font-size: 13px; color: var(--text-muted); margin-bottom: 22px; }
-
-.stats-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 20px; }
-
-.stat-box {
-  background: linear-gradient(145deg, #13101f, #0f0c1a);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 16px;
-  position: relative;
-  overflow: hidden;
-}
-.stat-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(201,150,58,0.25), transparent); }
-
-.stat-val { font-family: 'Uncial Antiqua', serif; font-size: 30px; color: var(--parchment); letter-spacing: -1px; line-height: 1; }
-.stat-label { font-family: 'IM Fell English SC', serif; font-size: 9px; color: var(--text-muted); letter-spacing: 0.14em; text-transform: uppercase; margin-top: 4px; }
-.stat-box.highlight .stat-val { color: var(--gold2); text-shadow: 0 0 12px rgba(201,150,58,0.3); }
-
-.history-table-wrap {
-  background: linear-gradient(145deg, #13101f, #0f0c1a);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  overflow: hidden;
-}
-.history-table { width: 100%; border-collapse: collapse; }
-.history-table th { padding: 10px 16px; text-align: left; font-family: 'IM Fell English SC', serif; font-size: 9px; letter-spacing: 0.18em; color: var(--gold); border-bottom: 1px solid var(--border); font-weight: normal; }
-.history-table td { padding: 10px 16px; font-family: 'IM Fell English', serif; font-size: 12px; color: var(--text-muted); border-bottom: 1px solid rgba(46,40,72,0.4); }
-.history-table tr:last-child td { border-bottom: none; }
-.history-table tr:hover td { background: rgba(46,40,72,0.15); }
-.history-table td.date-col { color: var(--parchment); }
-
-.badge { display: inline-block; padding: 2px 8px; border-radius: 2px; font-family: 'IM Fell English SC', serif; font-size: 9px; letter-spacing: 0.08em; }
-.badge.focus { background: rgba(201,150,58,0.12); color: var(--gold2); border: 1px solid rgba(201,150,58,0.2); }
-.badge.break { background: rgba(90,48,144,0.15); color: var(--purple3); border: 1px solid rgba(90,48,144,0.2); }
-.badge.custom { background: rgba(139,26,26,0.15); color: #e06060; border: 1px solid rgba(139,26,26,0.2); }
-
-.history-empty { padding: 40px; text-align: center; font-family: 'IM Fell English', serif; font-style: italic; font-size: 14px; color: var(--text-dim); }
-
-/* ═══ STREAK CARD ═══ */
-.streak-card {
-  background: linear-gradient(145deg, #13101f, #0f0c1a);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 20px;
-  position: relative;
-  overflow: hidden;
-}
-.streak-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(201,150,58,0.3), transparent); }
-.streak-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
-.streak-num { font-family: 'Uncial Antiqua', serif; font-size: 42px; color: var(--gold2); letter-spacing: -2px; line-height: 1; text-shadow: 0 0 16px rgba(201,150,58,0.3); }
-.streak-info { font-family: 'IM Fell English SC', serif; font-size: 9px; color: var(--text-muted); letter-spacing: 0.14em; margin-top: 5px; }
-.streak-best { text-align: right; }
-.streak-best-val { font-family: 'Uncial Antiqua', serif; font-size: 24px; color: var(--text-muted); letter-spacing: -1px; }
-.streak-best-label { font-family: 'IM Fell English SC', serif; font-size: 9px; color: var(--text-dim); letter-spacing: 0.1em; }
-
-.mini-cal { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; margin-top: 12px; }
-.cal-day { aspect-ratio: 1; border-radius: 2px; background: rgba(46,40,72,0.2); }
-.cal-day.has-session { background: rgba(201,150,58,0.3); box-shadow: 0 0 4px rgba(201,150,58,0.2); }
-.cal-day.today { outline: 1px solid var(--gold); outline-offset: 1px; }
-
-.daily-goal-card {
-  background: linear-gradient(145deg, #13101f, #0f0c1a);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 18px;
-  margin-top: 14px;
-  position: relative;
-}
-.daily-goal-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(201,150,58,0.25), transparent); }
-.goal-title { font-family: 'IM Fell English SC', serif; font-size: 10px; letter-spacing: 0.16em; color: var(--gold); margin-bottom: 12px; }
-.goal-bar { height: 6px; background: rgba(46,40,72,0.5); border-radius: 3px; overflow: hidden; margin-bottom: 8px; border: 1px solid var(--border); }
-.goal-fill { height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold2)); border-radius: 3px; transition: width 0.6s ease; box-shadow: 0 0 8px rgba(201,150,58,0.4); }
-.goal-text { font-family: 'IM Fell English', serif; font-style: italic; font-size: 12px; color: var(--text-muted); }
-
-.export-btn {
-  width: 100%;
-  margin-top: 14px;
-  background: linear-gradient(145deg, #13101f, #0f0c1a);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text-muted);
-  font-family: 'IM Fell English SC', serif;
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  padding: 12px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.export-btn:hover { color: var(--gold2); border-color: var(--gold-dim); background: rgba(80,40,8,0.3); }
-
-/* ═══ MODAL — THE PROPHECY ═══ */
-.modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.88);
-  z-index: 500;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(5px);
-}
-.modal-overlay.show { display: flex; }
-
-.modal-prophecy {
-  background: linear-gradient(145deg, #15121f, #0f0c1a);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 36px 44px;
-  max-width: 380px;
-  width: 90%;
-  text-align: center;
-  box-shadow:
-    0 0 0 1px rgba(201,150,58,0.1),
-    0 0 60px rgba(201,150,58,0.15),
-    0 20px 60px rgba(0,0,0,0.7);
-  position: relative;
-  overflow: hidden;
-  animation: spell-cast 0.5s ease-out;
-}
-.modal-prophecy::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 50% 0%, rgba(201,150,58,0.08) 0%, transparent 65%);
-  pointer-events: none;
-}
-.modal-prophecy::after {
-  content: '✦ ✦ ✦';
-  position: absolute;
-  bottom: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 10px;
-  color: var(--gold-dim);
-  letter-spacing: 8px;
-}
-
-.modal-spell-icon { font-size: 44px; margin-bottom: 14px; display: block; animation: float-up 3s ease-in-out infinite; }
-.modal-spell { font-family: 'Uncial Antiqua', serif; font-size: 11px; letter-spacing: 0.3em; color: var(--gold-dim); text-transform: uppercase; margin-bottom: 6px; }
-.modal-title { font-family: 'Uncial Antiqua', serif; font-size: 22px; color: var(--gold2); margin-bottom: 6px; text-shadow: 0 0 12px rgba(201,150,58,0.35); }
-.modal-sub { font-family: 'IM Fell English', serif; font-style: italic; font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
-.modal-btn {
-  background: linear-gradient(135deg, #4a1a0a, #6e2510);
-  border: 1px solid #8b3a1a;
-  border-radius: 4px;
-  color: #f5c090;
-  font-family: 'Uncial Antiqua', serif;
-  font-size: 12px;
-  letter-spacing: 0.15em;
-  padding: 11px 30px;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-shadow: 0 0 8px rgba(245,192,144,0.3);
-}
-.modal-btn:hover { background: linear-gradient(135deg, #6e2510, #903015); box-shadow: 0 0 16px rgba(180,80,40,0.4); }
-
-/* ═══ TOAST ═══ */
-.toast {
-  position: fixed;
-  bottom: 28px; left: 50%;
-  transform: translateX(-50%) translateY(16px);
-  background: linear-gradient(135deg, #15121f, #0f0c1a);
-  border: 1px solid var(--gold-dim);
-  border-radius: 4px;
-  padding: 9px 20px;
-  font-family: 'IM Fell English SC', serif;
-  font-size: 11px;
-  color: var(--gold2);
-  letter-spacing: 0.1em;
-  opacity: 0;
-  transition: all 0.28s;
-  pointer-events: none;
-  z-index: 9999;
-  white-space: nowrap;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.6), 0 0 20px rgba(201,150,58,0.1);
-}
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-/* ═══ SCROLLBAR ═══ */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-/* ═══ RESPONSIVE ═══ */
-@media(max-width: 820px) {
-  .timer-layout, .history-layout { grid-template-columns: 1fr; }
-  .app-nav { padding: 20px 20px 0; flex-wrap: wrap; gap: 14px; }
-  .page { padding: 24px 20px 60px; }
-  .stats-strip { grid-template-columns: repeat(2,1fr); }
-  .right-panel { position: static; }
-  .time-display { font-size: 46px; }
-  .logo-title { font-size: 22px; }
-  .candle-row { gap: 30px; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Baker Street Journal | Sherlock Holmes' Notes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #d4a10a;
+            --secondary: #1a0a0a;
+            --accent: #2d1b00;
+            --text: #e0e0e0;
+            --card-bg: #1a0a0a;
+            --highlight: #e6d2a5;
+        }
+
+        body {
+            background: linear-gradient(to bottom, #120808 0%, #0a0202 100%);
+            font-family: 'Source Sans Pro', sans-serif;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2ajor=1.1" width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"><path d="M0 0 L100 0 L100 100 L0 100 Z"/><path d="M10 10 L90 10 L90 90 L10 90 Z"/></svg>');
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 25px;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(212, 161, 10, 0.5);
+            position: relative;
+            display: inline-block;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .header-icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            position: relative;
+        }
+
+        .header-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            font-size: 1.2rem;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .header-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+        }
+
+        /* Section Styles */
+        section {
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: linear-gradient(to right, var(--accent), #2d1b00);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-header i {
+            font-size: 1.5rem;
+            margin-right: 10px;
+            color: var(--primary);
+        }
+
+        .section-content {
+            padding: 20px;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(212, 161, 10, 0.3);
+        }
+
+        /* Card Styles */
+        .card {
+            background: #1e0b0b;
+            border-left: 3px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 0 5px 5px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .card-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+
+        .tome-card {
+            background: #1a0a0a;
+            border: 1px solid #2d1b00;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .tome-header {
+            background: linear-gradient(to right, #331c0a, #2d1b00);
+            padding: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .tome-date {
+            font-family: 'Playfair Display', serif;
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .tome-entry {
+            padding: 15px;
+            border-bottom: 1px solid #2d1b00;
+            background: #1e0b0b;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        .tome-entry:last-child {
+            border-bottom: none;
+        }
+
+        .tome-entry-text {
+            flex-grow: 1;
+            margin-left: 10px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .tome-entry-text span {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* Button Styles */
+        .btn {
+            background: linear-gradient(to right, var(--primary), #d4a10a);
+            color: #1a0a0a;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            text-align: center;
+            margin-top: 10px;
+            box-shadow: 0 3px 10px rgba(212, 161, 10, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(212, 161, 10, 0.6);
+        }
+
+        .btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(212, 161, 10, 0.5);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #2d1b00;
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        /* Status Indicator */
+        .status-indicator {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #1a0a0a;
+            box-shadow: 0 0 10px rgba(212, 161, 10, 0.5);
+        }
+
+        .status-text {
+            position: absolute;
+            bottom: 55px;
+            right: 30px;
+            background: var(--primary);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .status-indicator:hover .status-text {
+            opacity: 1;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .logo {
+                font-size: 2rem;
+            }
+            
+            .section-header {
+                font-size: 1.2rem;
+            }
+            
+            .header-icons {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+            
+            .status-indicator {
+                right: 10px;
+                bottom: 10px;
+            }
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 1.5s ease infinite;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <header>
+            <h1 class="logo">The Baker Street Journal</h1>
+            <div class="header-icons">
+                <div class="header-icon" title="Focus on investigation">
+                    <i class="fas fa-magnifying-glass"></i>
+                </div>
+                <div class="header-icon" title="Take a break">
+                    <i class="fas fa-pipe"></i>
+                </div>
+                <div class="header-icon" title="Document case">
+                    <i class="fas fa-book"></i>
+                </div>
+            </div>
+        </header>
 
-<!-- ═══ CASTLE BACKGROUND ═══ -->
-<div class="castle-bg" id="castleBg">
-  <div class="castle-silhouette"></div>
-  <div class="owl" id="owlEl">🦉</div>
-  <div class="snitch" id="snitchEl"></div>
-</div>
+        <!-- Focus Section -->
+        <section id="focus-section">
+            <div class="section-header">
+                <i class="fas fa-magnifying-glass"></i>
+                <h2>Current Case: The Disappearing Lady</h2>
+            </div>
+            <div class="section-content">
+                <div class="section-title">Observations & Notes</div>
+                
+                <div class="card">
+                    <div class="card-title">Victor Watson</div>
+                    <div class="card-content">Witnessed the incident at the Thames Embankment. Reported seeing the lady vanish behind a street lamp at 8:15 PM. Noted her distinctive blue riding habit and the pocket watch she carried. Said she was "very anxious" about something, but couldn't elaborate. The man who was with her had a rather unusual scar on his right cheek.</div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">Mrs. Holmes (2:45 PM)</div>
+                    <div class="card-content">Received a note from Lestrade at 2:45 PM. The note indicated that the witness reported a similar sighting from 8:30 PM the previous evening. However, there were discrepancies - the witness was with a different man with a scar on the left side of his face. The note concluded with "The lady is quite nervous about the matter."</div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">The Pipe</div>
+                    <div class="card-content">At 6:15 PM, Lestrade called with a lead. The pipe of the suspected man (Mr. Watson) was found near the scene. It contained a minute amount of arsenic in the tobacco - the kind used in certain theatrical performances. A possible clue?</div>
+                </div>
+            </div>
+        </section>
 
-<!-- ═══ NAVIGATION ═══ -->
-<nav class="app-nav">
-  <div class="logo-block">
-    <div class="logo-hogwarts">Hogwarts School of Witchcraft &amp; Wizardry</div>
-    <div class="logo-title">⚡ Focus Spells ⚡</div>
-    <div class="logo-subtitle">Cast your concentration. Master the art.</div>
-    <div class="house-crests" id="houseCrests">
-      <div class="crest gryffindor active" onclick="setHouse('gryffindor')" title="Gryffindor">🦁</div>
-      <div class="crest slytherin" onclick="setHouse('slytherin')" title="Slytherin">🐍</div>
-      <div class="crest ravenclaw" onclick="setHouse('ravenclaw')" title="Ravenclaw">🦅</div>
-      <div class="crest hufflepuff" onclick="setHouse('hufflepuff')" title="Hufflepuff">🦡</div>
-    </div>
-  </div>
-  <div class="nav-right">
-    <div class="nav-tabs">
-      <button class="nav-tab active" onclick="showPage('timer',this)">🔮 Casting Room</button>
-      <button class="nav-tab" onclick="showPage('history',this)">📖 Tome of Records</button>
-    </div>
-  </div>
-</nav>
+        <!-- Break Section -->
+        <section id="break-section">
+            <div class="section-header">
+                <i class="fas fa-pipe"></i>
+                <h2>Current Break: 10:45 PM</h2>
+            </div>
+            <div class="section-content">
+                <div class="section-title">Break Details</div>
+                
+                <div class="card">
+                    <div class="card-title">Break Time</div>
+                    <div class="card-content">The break started at 10:45 PM and lasts for 30 minutes. You'll need to return to the case at 11:15 PM.</div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">Current Location</div>
+                    <div class="card-content">You are currently at the residence of Inspector Lestrade. The room is well-lit with gas lamps. The windows look out onto Baker Street.</div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">Activities Available</div>
+                    <div class="card-content">- Check the case files: View all evidence gathered so far<br>
+                    - Talk to Watson: Discuss the case with your friend<br>
+                    - Examine the scene: Visit the location of the disappearance</div>
+                </div>
+            </div>
+        </section>
 
-<!-- ═══════════ TIMER PAGE ═══════════ -->
-<div class="page active" id="page-timer">
-  <div class="timer-layout">
+        <!-- Tome Section -->
+        <section id="tome-section" class="tome-card">
+            <div class="tome-header">
+                <div class="tome-date">July 3, 1888</div>
+                <div class="tome-title">The Disappearing Lady</div>
+            </div>
+            
+            <div class="tome-entry">
+                <div class="tome-entry-text">
+                    <span>Case No. 12</span> - The case of the disappearing lady is quite perplexing. I was called to assist Inspector Lestrade at the Thames Embankment. The witness, Victor Watson, reported seeing a lady vanish behind a street lamp at 8:15 PM. She was wearing a distinctive blue riding habit and carried a pocket watch.
+                </div>
+            </div>
+            
+            <div class="tome-entry">
+                <div class="tome-entry-text">
+                    <span>Case No. 12</span> - The witness also mentioned that the lady was "very anxious" about something, but couldn't elaborate. The man who was with her had a rather unusual scar on his right cheek. This seems to be a crucial detail.
+                </div>
+            </div>
+            
+            <div class="tome-entry">
+                <div class="tome-entry-text">
+                    <span>Case No. 12</span> - Upon further examination, I found that the witness's account contains inconsistencies. The same man, Mr. Watson, was seen with the lady at 8:30 PM the previous evening, but with a different scar location (left cheek instead of right). This inconsistency suggests possible deception.
+                </div>
+            </div>
+            
+            <div class="tome-entry">
+                <div class="tome-entry-text">
+                    <span>Case No. 12</span> - Additionally, the pipe of Mr. Watson contained traces of arsenic in the tobacco. This is a significant clue - arsenic was used in some theatrical performances to create the illusion of death.
+                </div>
+            </div>
+            
+            <div class="tome-entry">
+                <div class="tome-entry-text">
+                    <span>Case No. 12</span> - Based on this evidence, I suspect the lady was performing a magic trick or illusion. The disappearance was a controlled event, not a genuine act of crime. The lady may have been a magician, and Mr. Watson was part of her act.
+                </div>
+            </div>
+            
+            <div class="tome-entry">
+                <div class="tome-entry-text">
+                    <span>Case No. 12</span> - The lady was not harmed; she simply disappeared as part of her performance. I have advised Inspector Lestrade that this is an illusion, not a crime. The case has been closed.
+                </div>
+            </div>
+        </section>
 
-    <!-- LEFT: MAIN TIMER -->
-    <div>
-      <div class="mode-tabs" id="modeTabs"></div>
-
-      <div class="timer-scroll" id="timerWrap">
-        <!-- Corner decorations -->
-        <span class="scroll-corner sc-tl">⚡</span>
-        <span class="scroll-corner sc-tr">⚡</span>
-        <span class="scroll-corner sc-bl">✦</span>
-        <span class="scroll-corner sc-br">✦</span>
-
-        <!-- Floating candles -->
-        <div class="candle-row" id="candleRow">
-          <div class="candle"><div class="candle-flame"></div><div class="candle-body"></div><div class="candle-base"></div></div>
-          <div class="candle"><div class="candle-flame" style="animation-delay:0.3s"></div><div class="candle-body"></div><div class="candle-base"></div></div>
-          <div class="candle"><div class="candle-flame" style="animation-delay:0.7s"></div><div class="candle-body"></div><div class="candle-base"></div></div>
-          <div class="candle"><div class="candle-flame" style="animation-delay:1.1s"></div><div class="candle-body"></div><div class="candle-base"></div></div>
+        <div class="status-indicator" id="status-indicator">
+            <span>🔍</span>
+            <div class="status-text">Observing case</div>
         </div>
 
-        <div class="spell-label" id="timerLabel">TEMPUS FOCUS</div>
-
-        <!-- Timer Ring -->
-        <div class="timer-ring-wrap">
-          <svg class="timer-svg" viewBox="0 0 230 230">
-            <!-- Rune circle (rotating outer) -->
-            <circle class="ring-runes" cx="115" cy="115" r="108"
-              stroke-dasharray="3 12"
-              style="animation:magic-ring 40s linear infinite;transform-origin:115px 115px;"/>
-
-            <!-- Tick marks -->
-            <g>
-              <line class="ring-tick" x1="115" y1="10" x2="115" y2="20" transform="rotate(0,115,115)"/>
-              <line class="ring-tick" x1="115" y1="10" x2="115" y2="16" transform="rotate(30,115,115)"/>
-              <line class="ring-tick" x1="115" y1="10" x2="115" y2="16" transform="rotate(60,115,115)"/>
-              <line class="ring-tick" x1="115" y1="10" x2="115" y2="20" transform="rotate(90,115,115)"/>
-              <line class="ring-tick" x1="115" y1="10" x2="115" y2="16" transform="rotate(120,115,115)"/>
-              <line class="ring-tick" x1="115" y1="10" x2="115" y2="16" transform="rotate(150,115,115)"/>
-              <line class="ring-tick" x1="115" y1="10" x2="115" y2="20" transform="rotate(180,115,115)"/>
-              <line class="ring-tick" x1="115" y1="10" x2="115" y2="16" transform="rotate(210,115,115)"/>
-              <line class="ring-tick" x1="115" y1="10" x2="115" y2="16" transform="rotate(240,115,115)"/>
-              <line class="ring-tick" x1="115" y1="10" x2="115" y2="20" transform="rotate(270,115,115)"/>
-              <line class="ring-tick" x1="115" y1="10" x2="115" y2="16" transform="rotate(300,115,115)"/>
-              <line class="ring-tick" x1="115" y1="10" x2="115" y2="16" transform="rotate(330,115,115)"/>
-            </g>
-
-            <!-- Glow ring -->
-            <circle class="ring-glow" id="ringGlow" cx="115" cy="115" r="100"/>
-            <!-- Track -->
-            <circle class="ring-track" cx="115" cy="115" r="100"/>
-            <!-- Progress -->
-            <circle class="ring-progress" id="timerProgress" cx="115" cy="115" r="100"/>
-
-            <!-- Inner decorative stars -->
-            <text x="115" y="60" text-anchor="middle" font-size="10" fill="rgba(201,150,58,0.15)" font-family="serif">⚡</text>
-            <text x="60" y="130" text-anchor="middle" font-size="8" fill="rgba(201,150,58,0.1)" font-family="serif">✦</text>
-            <text x="170" y="130" text-anchor="middle" font-size="8" fill="rgba(201,150,58,0.1)" font-family="serif">✦</text>
-          </svg>
-
-          <div class="timer-digits">
-            <div class="time-display" id="timeDisplay">25:00</div>
-            <div class="session-label" id="sessionCount">SPELL I / IV</div>
-          </div>
-        </div>
-
-        <!-- House points gems -->
-        <div class="house-points-row" id="sessionsRow"></div>
-
-        <!-- Controls -->
-        <div class="controls">
-          <button class="btn" onclick="resetTimer()">↺ Finite</button>
-          <button class="btn btn-cast" id="startBtn" onclick="toggleTimer()">⚡ Expecto</button>
-          <button class="btn" onclick="skipSession()">Nox ›</button>
-        </div>
-
-        <div class="spellbook-hint">
-          <span><kbd>Space</kbd> cast/pause</span>
-          <span><kbd>R</kbd> finite</span>
-          <span><kbd>S</kbd> skip</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- RIGHT PANEL -->
-    <div class="right-panel">
-
-      <!-- Settings / Rules -->
-      <div class="panel-card">
-        <div class="panel-header"><span><span class="ph-icon">📜</span>Enchantment Rules</span></div>
-        <div class="settings-grid">
-          <div class="setting-row">
-            <span class="setting-label">Spells per cycle</span>
-            <input class="setting-input" id="settingCycle" type="number" min="1" max="12" value="4" onchange="saveSetting('cycle',this.value);renderSessionDots();updateSessionCount();">
-          </div>
-          <div class="setting-row">
-            <span class="setting-label">Daily spell goal</span>
-            <input class="setting-input" id="settingGoal" type="number" min="1" max="50" value="8" onchange="saveSetting('goal',this.value);">
-          </div>
-          <div class="setting-row">
-            <span class="setting-label">Hedwig's bell</span>
-            <button class="toggle on" id="alarmToggle" onclick="toggleSetting('alarm',this)"></button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Spell List (Tasks) -->
-      <div class="panel-card">
-        <div class="panel-header">
-          <span><span class="ph-icon">🧙</span>Spell List</span>
-          <span id="taskProgress" style="font-family:'IM Fell English SC',serif;font-size:10px;color:var(--text-dim)"></span>
-        </div>
-        <div class="task-add-row">
-          <input class="task-input" id="taskInput" placeholder="Add an incantation..." maxlength="80" onkeydown="if(event.key==='Enter')addTask()">
-          <button class="btn-sm" onclick="addTask()">+</button>
-        </div>
-        <div class="tasks-list" id="tasksList"></div>
-      </div>
-
-      <!-- Parchment Note -->
-      <div class="panel-card">
-        <div class="panel-header"><span><span class="ph-icon">🪶</span>Parchment Scroll</span></div>
-        <div class="note-wrap">
-          <textarea class="parchment-note" id="sessionNote" placeholder="What magic are you working on..." rows="3" oninput="saveNote()"></textarea>
-        </div>
-      </div>
-
-      <!-- Spell Modes -->
-      <div class="panel-card">
-        <div class="panel-header"><span><span class="ph-icon">📚</span>Spellbook Modes</span></div>
-        <div class="modes-list" id="modesList"></div>
-        <div class="add-mode-form">
-          <input class="form-input" id="newModeName" placeholder="Spell name" maxlength="18">
-          <input class="form-input narrow" id="newModeMins" type="number" min="1" max="180" placeholder="min">
-          <button class="btn-sm" onclick="addCustomMode()">+</button>
-        </div>
-      </div>
-
-      <!-- Wizarding Wireless -->
-      <div class="panel-card">
-        <div class="panel-header">
-          <span><span class="ph-icon">🎵</span>Wizarding Wireless</span>
-          <span style="font-family:'IM Fell English',serif;font-size:9px;color:var(--text-dim);font-style:italic">plays while casting</span>
-        </div>
-        <div class="music-upload-zone" id="dropZone">
-          <input type="file" id="musicFileInput" accept="audio/*" multiple onchange="handleFiles(this.files)">
-          <div class="upload-icon">🦉</div>
-          <div class="upload-text">Owl-post your music or <span>summon from device</span></div>
-        </div>
-        <div class="playlist" id="playlist"></div>
-        <div class="music-controls" id="musicControls" style="display:none">
-          <div class="now-playing">NOW CASTING<span class="now-playing-name" id="nowPlayingName">—</span></div>
-          <div class="music-btns">
-            <button class="music-btn" onclick="prevTrack()">◂</button>
-            <button class="music-btn" id="playPauseBtn" onclick="toggleMusicPlay()">▶</button>
-            <button class="music-btn" onclick="nextTrack()">▸</button>
-            <button class="music-btn" id="loopBtn" onclick="toggleLoop()">⟳</button>
-          </div>
-          <div class="volume-row">
-            <span class="vol-icon">♪</span>
-            <input type="range" id="volumeSlider" min="0" max="100" value="70" oninput="setVolume(this.value)">
-          </div>
-        </div>
-        <div class="autoplay-row">
-          <button class="toggle on" id="autoplayToggle" onclick="toggleAutoplay()"></button>
-          <span>Auto-play when spell begins</span>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════ HISTORY PAGE ═══════════ -->
-<div class="page" id="page-history">
-  <div class="history-layout">
-    <div>
-      <div class="tome-title">📖 Tome of Records</div>
-      <div class="tome-subtitle">A chronicle of your magical achievements at Hogwarts</div>
-
-      <div class="stats-strip">
-        <div class="stat-box highlight"><div class="stat-val" id="statToday">0</div><div class="stat-label">Today</div></div>
-        <div class="stat-box"><div class="stat-val" id="statWeek">0</div><div class="stat-label">This Week</div></div>
-        <div class="stat-box"><div class="stat-val" id="statTotal">0</div><div class="stat-label">All Time</div></div>
-        <div class="stat-box"><div class="stat-val" id="statFocusTime">0m</div><div class="stat-label">Focus Time</div></div>
-      </div>
-
-      <div class="history-table-wrap">
-        <table class="history-table">
-          <thead>
-            <tr>
-              <th>Date &amp; Time</th>
-              <th>Spell</th>
-              <th>Duration</th>
-              <th>Scroll</th>
-            </tr>
-          </thead>
-          <tbody id="historyTableBody"></tbody>
-        </table>
-        <div class="history-empty" id="historyEmpty">
-          The tome is blank. Begin casting to write your legend...
-        </div>
-      </div>
+        <footer>
+            <p>The Baker Street Journal &copy; 2023 | Sherlock Holmes Case Files</p>
+        </footer>
     </div>
 
-    <div>
-      <div class="streak-card">
-        <div class="streak-top">
-          <div>
-            <div class="streak-num" id="streakNum">0</div>
-            <div class="streak-info">⚡ Day Streak</div>
-          </div>
-          <div class="streak-best">
-            <div class="streak-best-val" id="streakBest">0</div>
-            <div class="streak-best-label">Best Streak</div>
-          </div>
-        </div>
-        <div class="mini-cal" id="miniCal"></div>
-      </div>
-
-      <div class="daily-goal-card">
-        <div class="goal-title">🏆 Daily Quest</div>
-        <div class="goal-bar"><div class="goal-fill" id="goalFill" style="width:0%"></div></div>
-        <div class="goal-text" id="goalText">
-          <span style="color:var(--parchment)">0</span> of <span id="goalTarget">8</span> spells cast today
-        </div>
-      </div>
-
-      <button class="export-btn" onclick="exportCSV()">📜 Export Tome as CSV</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ PROPHECY MODAL ═══ -->
-<div class="modal-overlay" id="alarmModal">
-  <div class="modal-prophecy">
-    <span class="modal-spell-icon" id="modalIcon">⚡</span>
-    <div class="modal-spell" id="modalSpell">TEMPUS PERFECTUS</div>
-    <div class="modal-title" id="modalTitle">Spell Complete!</div>
-    <div class="modal-sub" id="modalSub">Your concentration has earned you house points.</div>
-    <button class="modal-btn" onclick="closeModal()">✦ Alohomora ✦</button>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-<audio id="audioPlayer" preload="auto"></audio>
-
-<script>
-// ═══════════════════════════════════════════════════
-// CONSTANTS & STATE
-// ═══════════════════════════════════════════════════
-const CIRC = 2 * Math.PI * 100; // r=100 → ~628.3
-
-const HOUSES = {
-  gryffindor: { primary:'#740001', secondary:'#ae0001', accent:'#d3a625', sessionColor:'#d3a625', sessionRgb:'211,166,37' },
-  slytherin:  { primary:'#1a3a1a', secondary:'#2d6e2d', accent:'#aaa9ad', sessionColor:'#7ab87a', sessionRgb:'122,184,122' },
-  ravenclaw:  { primary:'#0e1f4a', secondary:'#1a3a7a', accent:'#946b2d', sessionColor:'#6090e0', sessionRgb:'96,144,224' },
-  hufflepuff: { primary:'#3a2d00', secondary:'#6e5800', accent:'#000000', sessionColor:'#e8c84b', sessionRgb:'232,200,75' },
-};
-
-const defaultModes = [
-  { id:'focus',   name:'Focus Spell',   minutes:25, color:'#c9963a', type:'work'  },
-  { id:'short',   name:'Short Recess',  minutes:5,  color:'#7850b8', type:'break' },
-  { id:'long',    name:'Long Recess',   minutes:15, color:'#3060b8', type:'break' },
-];
-
-const LS = {
-  get:(k,d)=>{ try{ const v=localStorage.getItem(k); return v!==null?JSON.parse(v):d; }catch(e){return d;} },
-  set:(k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
-};
-
-let customModes   = LS.get('hp_custom_modes',[]);
-let allModes      = [];
-let currentModeId = 'focus';
-let timerInterval = null;
-let totalSeconds  = 0, remainingSeconds = 0;
-let isRunning     = false;
-let completedSessions = 0;
-let currentHouse  = LS.get('hp_house','gryffindor');
-
-let settings = LS.get('hp_settings',{
-  cycle:4, goal:8, alarm:true, autoplay:true, volume:70, loop:false
-});
-let tasks   = LS.get('hp_tasks',[]);
-let history = LS.get('hp_history',[]);
-let tracks  = [], currentTrackIndex=-1, isAudioPlaying=false;
-let toastTmr;
-
-const audio = document.getElementById('audioPlayer');
-
-// ═══════════════════════════════════════════════════
-// CASTLE BACKGROUND FX
-// ═══════════════════════════════════════════════════
-function buildCastleFX(){
-  const bg = document.getElementById('castleBg');
-
-  // Stars
-  for(let i=0;i<120;i++){
-    const s=document.createElement('div');
-    const sz = Math.random()*2+0.5;
-    s.className='star';
-    s.style.cssText=`
-      left:${Math.random()*100}%;top:${Math.random()*70}%;
-      width:${sz}px;height:${sz}px;
-      opacity:${0.3+Math.random()*0.7};
-      --dur:${3+Math.random()*4}s;
-      --delay:-${Math.random()*6}s;
-      --fy:-${20+Math.random()*40}px;
-      --fy2:-${50+Math.random()*60}px;
-      animation:none;
-    `;
-    // Simple twinkling via opacity animation
-    s.style.animation=`rune-pulse ${2+Math.random()*4}s ease-in-out infinite ${Math.random()*4}s`;
-    bg.appendChild(s);
-  }
-
-  // Shooting stars
-  for(let i=0;i<3;i++){
-    const ss=document.createElement('div');
-    ss.className='shooting-star';
-    ss.style.cssText=`
-      left:${20+Math.random()*60}%;top:${10+Math.random()*25}%;
-      --sx:-${150+Math.random()*200}px;
-      --sy:${80+Math.random()*120}px;
-      --dur:${6+Math.random()*8}s;
-      --delay:-${Math.random()*12}s;
-    `;
-    bg.appendChild(ss);
-  }
-
-  // Magic particles
-  const colors=['#c9963a','#7850b8','#3060b8','#a060ff','#e8b84b'];
-  for(let i=0;i<20;i++){
-    const p=document.createElement('div');
-    p.className='magic-particle';
-    const sz=Math.random()*3+1;
-    p.style.cssText=`
-      left:${Math.random()*100}%;top:${Math.random()*80}%;
-      width:${sz}px;height:${sz}px;
-      background:${colors[i%colors.length]};
-      opacity:0.4;
-      --dur:${5+Math.random()*7}s;
-      --delay:-${Math.random()*8}s;
-      --fy:-${30+Math.random()*60}px;
-      --fy2:-${80+Math.random()*100}px;
-      box-shadow:0 0 4px currentColor;
-    `;
-    bg.appendChild(p);
-  }
-
-  // Castle windows
-  for(let i=0;i<30;i++){
-    const w=document.createElement('div');
-    w.className='castle-window';
-    w.style.cssText=`
-      left:${3+Math.random()*94}%;
-      bottom:${20+Math.random()*140}px;
-      --offset:${Math.random()*2}s;
-      --delay:-${Math.random()*3}s;
-      opacity:${0.3+Math.random()*0.5};
-    `;
-    bg.appendChild(w);
-  }
-}
-
-buildCastleFX();
-
-// ═══════════════════════════════════════════════════
-// HOUSE SYSTEM
-// ═══════════════════════════════════════════════════
-function setHouse(house){
-  currentHouse = house;
-  LS.set('hp_house', house);
-  const h = HOUSES[house];
-  document.documentElement.style.setProperty('--house-primary', h.primary);
-  document.documentElement.style.setProperty('--house-secondary', h.secondary);
-  document.documentElement.style.setProperty('--house-accent', h.accent);
-  // Update session color only if current mode is 'focus'
-  const mode = allModes.find(m=>m.id===currentModeId);
-  if(mode && mode.id==='focus'){
-    document.documentElement.style.setProperty('--session-color', h.sessionColor);
-    document.documentElement.style.setProperty('--session-rgb', h.sessionRgb);
-    document.getElementById('timerProgress').style.stroke = h.sessionColor;
-    document.getElementById('ringGlow').style.stroke = `rgba(${h.sessionRgb},0.15)`;
-  }
-  document.querySelectorAll('.crest').forEach(c=>{
-    c.classList.toggle('active', c.classList.contains(house));
-  });
-  showToast(`${house.charAt(0).toUpperCase()+house.slice(1)} selected! ⚡`);
-}
-
-// Init house
-setHouse(currentHouse);
-
-// ═══════════════════════════════════════════════════
-// PAGE NAV
-// ═══════════════════════════════════════════════════
-function showPage(id, el){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
-  if(el) el.classList.add('active');
-  if(id==='history') renderHistory();
-}
-
-// ═══════════════════════════════════════════════════
-// MODES
-// ═══════════════════════════════════════════════════
-function buildModes(){ allModes=[...defaultModes,...customModes]; }
-
-function renderModeTabs(){
-  const el=document.getElementById('modeTabs'); el.innerHTML='';
-  allModes.forEach(m=>{
-    const b=document.createElement('button');
-    b.className='mode-tab'+(m.id===currentModeId?' active':'');
-    b.textContent=m.name;
-    b.onclick=()=>selectMode(m.id);
-    el.appendChild(b);
-  });
-}
-
-function renderModesList(){
-  const el=document.getElementById('modesList'); el.innerHTML='';
-  allModes.forEach(m=>{
-    const d=document.createElement('div'); d.className='mode-item';
-    d.innerHTML=`
-      <div class="mode-pip" style="background:${m.color};color:${m.color}"></div>
-      <div class="mode-info">
-        <div class="mode-name">${m.name}</div>
-        <div class="mode-duration">${m.minutes} min</div>
-      </div>
-      ${m.id.startsWith('custom_')?`<button class="mode-delete" onclick="deleteMode('${m.id}',event)">×</button>`:''}
-    `;
-    d.onclick=e=>{ if(!e.target.classList.contains('mode-delete')) selectMode(m.id); };
-    el.appendChild(d);
-  });
-}
-
-function hexToRgb(h){ const r=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(h); return r?`${parseInt(r[1],16)},${parseInt(r[2],16)},${parseInt(r[3],16)}`:null; }
-
-function selectMode(id){
-  if(isRunning){ showToast('Pause your spell before switching modes'); return; }
-  currentModeId=id;
-  const m=allModes.find(x=>x.id===id); if(!m) return;
-  totalSeconds=m.minutes*60; remainingSeconds=totalSeconds;
-  const color = (id==='focus')?HOUSES[currentHouse].sessionColor:m.color;
-  document.documentElement.style.setProperty('--session-color', color);
-  const rgb = hexToRgb(color);
-  if(rgb) document.documentElement.style.setProperty('--session-rgb', rgb);
-  document.getElementById('timerLabel').textContent=m.name.toUpperCase();
-  renderModeTabs(); renderModesList(); updateDisplay(); updateProgress(1);
-}
-
-function addCustomMode(){
-  const name=document.getElementById('newModeName').value.trim();
-  const mins=parseInt(document.getElementById('newModeMins').value);
-  if(!name){ showToast('Name your spell'); return; }
-  if(!mins||mins<1||mins>180){ showToast('Enter valid minutes (1–180)'); return; }
-  const colors=['#8b3a8b','#3a8b8b','#8b6a3a','#3a5a8b','#8b3a5a'];
-  customModes.push({id:'custom_'+Date.now(),name,minutes:mins,color:colors[customModes.length%colors.length],type:'custom'});
-  LS.set('hp_custom_modes',customModes);
-  buildModes(); renderModeTabs(); renderModesList();
-  document.getElementById('newModeName').value='';
-  document.getElementById('newModeMins').value='';
-  showToast(`"${name}" added to spellbook`);
-}
-
-function deleteMode(id,e){
-  e.stopPropagation();
-  customModes=customModes.filter(m=>m.id!==id);
-  LS.set('hp_custom_modes',customModes);
-  buildModes();
-  if(currentModeId===id) selectMode('focus');
-  else { renderModeTabs(); renderModesList(); }
-}
-
-// ═══════════════════════════════════════════════════
-// TIMER
-// ═══════════════════════════════════════════════════
-function toggleTimer(){ isRunning?pauseTimer():startTimer(); }
-
-function startTimer(){
-  if(remainingSeconds<=0) return;
-  isRunning=true;
-  document.getElementById('startBtn').innerHTML='⏸ Finite';
-  document.getElementById('timerWrap').classList.add('running');
-  timerInterval=setInterval(tick,1000);
-  if(settings.autoplay && tracks.length>0 && !isAudioPlaying) playAudio();
-}
-
-function pauseTimer(){
-  isRunning=false; clearInterval(timerInterval);
-  document.getElementById('startBtn').innerHTML='⚡ Expecto';
-  document.getElementById('timerWrap').classList.remove('running');
-  if(isAudioPlaying) pauseAudio();
-}
-
-function resetTimer(){
-  pauseTimer();
-  document.getElementById('startBtn').innerHTML='⚡ Expecto';
-  const m=allModes.find(x=>x.id===currentModeId);
-  totalSeconds=m.minutes*60; remainingSeconds=totalSeconds;
-  updateDisplay(); updateProgress(1);
-}
-
-function tick(){
-  remainingSeconds--;
-  if(remainingSeconds<=0){
-    remainingSeconds=0; updateDisplay(); updateProgress(0);
-    clearInterval(timerInterval); isRunning=false;
-    document.getElementById('timerWrap').classList.remove('running');
-    document.getElementById('startBtn').innerHTML='⚡ Expecto';
-    onSessionComplete(); return;
-  }
-  updateDisplay(); updateProgress(remainingSeconds/totalSeconds);
-}
-
-function skipSession(){ if(isRunning) pauseTimer(); onSessionComplete(); }
-
-function onSessionComplete(){
-  const mode=allModes.find(m=>m.id===currentModeId);
-  const note=document.getElementById('sessionNote').value.trim();
-  history.unshift({
-    id:Date.now(), ts:new Date().toISOString(),
-    mode:mode?.name||'Focus Spell', type:mode?.type||'work',
-    minutes:mode?.minutes||25, note, house:currentHouse
-  });
-  LS.set('hp_history',history);
-  completedSessions++;
-  renderSessionDots(); updateSessionCount();
-
-  if(settings.alarm){
-    playAlarm();
-    const isWork=(mode?.type==='work'||mode?.type==='custom');
-    document.getElementById('modalIcon').textContent = isWork?'⚡':'🌙';
-    document.getElementById('modalSpell').textContent = isWork?'TEMPUS PERFECTUS':'RENNERVATE';
-    document.getElementById('modalTitle').textContent = isWork?'Spell Mastered!':'Recess Concluded!';
-    document.getElementById('modalSub').textContent = isWork
-      ? `10 points to ${currentHouse.charAt(0).toUpperCase()+currentHouse.slice(1)}! Time for recess.`
-      : 'The Great Hall calls you back to your studies...';
-    document.getElementById('alarmModal').classList.add('show');
-  } else {
-    showToast(mode?.type==='work'?`⚡ +10 to ${currentHouse}! Take a break.`:'🌙 Back to your studies!');
-  }
-
-  // Auto-switch mode
-  if(mode?.type==='work'){
-    const cycle=parseInt(settings.cycle)||4;
-    const nextId=completedSessions%cycle===0?'long':'short';
-    if(allModes.find(m=>m.id===nextId)) setTimeout(()=>selectMode(nextId),900);
-  } else {
-    if(allModes.find(m=>m.id==='focus')) setTimeout(()=>selectMode('focus'),900);
-  }
-  document.getElementById('sessionNote').value='';
-  LS.set('hp_session_note','');
-}
-
-function updateDisplay(){
-  const m=Math.floor(remainingSeconds/60), s=remainingSeconds%60;
-  document.getElementById('timeDisplay').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-}
-
-function updateProgress(frac){
-  const offset=CIRC*(1-frac);
-  document.getElementById('timerProgress').style.strokeDashoffset=offset;
-  document.getElementById('ringGlow').style.strokeDashoffset=offset;
-}
-
-function updateSessionCount(){
-  const cycle=parseInt(settings.cycle)||4;
-  const roman=['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
-  const cur=roman[completedSessions%cycle]||String(completedSessions%cycle+1);
-  const tot=roman[cycle-1]||String(cycle);
-  document.getElementById('sessionCount').textContent=`SPELL ${cur} / ${tot}`;
-}
-
-function renderSessionDots(){
-  const row=document.getElementById('sessionsRow');
-  const cycle=parseInt(settings.cycle)||4;
-  row.innerHTML='';
-  for(let i=0;i<cycle;i++){
-    const d=document.createElement('div');
-    d.className='hp-gem'+(i<completedSessions%cycle?' earned':'');
-    row.appendChild(d);
-  }
-}
-
-// ═══════════════════════════════════════════════════
-// SETTINGS
-// ═══════════════════════════════════════════════════
-function saveSetting(k,v){ settings[k]=isNaN(v)?v:parseFloat(v); LS.set('hp_settings',settings); }
-function toggleSetting(k,el){ settings[k]=!settings[k]; el.classList.toggle('on',settings[k]); LS.set('hp_settings',settings); }
-function toggleAutoplay(){ settings.autoplay=!settings.autoplay; document.getElementById('autoplayToggle').classList.toggle('on',settings.autoplay); LS.set('hp_settings',settings); }
-
-function loadSettings(){
-  document.getElementById('settingCycle').value=settings.cycle||4;
-  document.getElementById('settingGoal').value=settings.goal||8;
-  document.getElementById('alarmToggle').classList.toggle('on',settings.alarm!==false);
-  document.getElementById('autoplayToggle').classList.toggle('on',settings.autoplay!==false);
-  document.getElementById('volumeSlider').value=settings.volume||70;
-  audio.volume=(settings.volume||70)/100;
-}
-
-// ═══════════════════════════════════════════════════
-// TASKS / SPELL LIST
-// ═══════════════════════════════════════════════════
-function addTask(){
-  const inp=document.getElementById('taskInput');
-  const text=inp.value.trim(); if(!text) return;
-  tasks.push({id:Date.now(),text,done:false,note:''});
-  LS.set('hp_tasks',tasks); inp.value=''; renderTasks();
-}
-
-function toggleTask(id){
-  const t=tasks.find(x=>x.id===id);
-  if(t){ t.done=!t.done; LS.set('hp_tasks',tasks); renderTasks(); }
-}
-
-function deleteTask(id,e){
-  e.stopPropagation();
-  tasks=tasks.filter(x=>x.id!==id);
-  LS.set('hp_tasks',tasks); renderTasks();
-}
-
-function updateTaskNote(id,val){
-  const t=tasks.find(x=>x.id===id);
-  if(t){ t.note=val; LS.set('hp_tasks',tasks); }
-}
-
-function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-function renderTasks(){
-  const el=document.getElementById('tasksList'); el.innerHTML='';
-  const done=tasks.filter(t=>t.done).length;
-  document.getElementById('taskProgress').textContent=tasks.length?`${done}/${tasks.length}`:'';
-  tasks.forEach(t=>{
-    const d=document.createElement('div');
-    d.className='task-item'+(t.done?' done':'');
-    d.innerHTML=`
-      <div class="task-check">${t.done?'✓':''}</div>
-      <div style="flex:1">
-        <div class="task-text">${esc(t.text)}</div>
-        <textarea class="task-note-input${t.note?' show':''}" placeholder="Annotations..." rows="2"
-          onchange="updateTaskNote(${t.id},this.value)">${esc(t.note||'')}</textarea>
-      </div>
-      <button class="task-del" onclick="deleteTask(${t.id},event)">×</button>
-    `;
-    d.querySelector('.task-check').onclick=()=>toggleTask(t.id);
-    d.querySelector('.task-text').ondblclick=()=>{
-      const ta=d.querySelector('.task-note-input');
-      ta.classList.toggle('show');
-      if(ta.classList.contains('show')) ta.focus();
-    };
-    el.appendChild(d);
-  });
-}
-
-function saveNote(){ LS.set('hp_session_note',document.getElementById('sessionNote').value); }
-
-// ═══════════════════════════════════════════════════
-// ALARM — Hedwig's Theme chime
-// ═══════════════════════════════════════════════════
-function playAlarm(){
-  try{
-    const ctx=new(window.AudioContext||window.webkitAudioContext)();
-    // Hedwig's theme opening notes (simplified): A5, D5, F5, A5, G5#, F5, A5...
-    const melody=[
-      [880,0.0], [587,0.25], [698,0.5], [880,0.75],
-      [830,1.05],[698,1.3], [880,1.6], [1047,2.0]
-    ];
-    melody.forEach(([freq,t])=>{
-      const osc=ctx.createOscillator(), gain=ctx.createGain();
-      const rev=ctx.createDelay(); rev.delayTime.value=0.08;
-      osc.connect(gain); gain.connect(rev); rev.connect(ctx.destination); gain.connect(ctx.destination);
-      osc.type='triangle';
-      osc.frequency.value=freq;
-      gain.gain.setValueAtTime(0,ctx.currentTime+t);
-      gain.gain.linearRampToValueAtTime(0.22,ctx.currentTime+t+0.04);
-      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+0.5);
-      osc.start(ctx.currentTime+t);
-      osc.stop(ctx.currentTime+t+0.6);
-    });
-    // Subtle sparkle
-    for(let i=0;i<5;i++){
-      const osc2=ctx.createOscillator(),g2=ctx.createGain();
-      osc2.connect(g2); g2.connect(ctx.destination);
-      osc2.type='sine';
-      osc2.frequency.value=1200+i*300;
-      g2.gain.setValueAtTime(0,ctx.currentTime+i*0.12);
-      g2.gain.linearRampToValueAtTime(0.05,ctx.currentTime+i*0.12+0.03);
-      g2.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.12+0.25);
-      osc2.start(ctx.currentTime+i*0.12);
-      osc2.stop(ctx.currentTime+i*0.12+0.3);
-    }
-    setTimeout(()=>ctx.close(),3000);
-  }catch(e){}
-}
-
-function closeModal(){ document.getElementById('alarmModal').classList.remove('show'); }
-
-// ═══════════════════════════════════════════════════
-// MUSIC — WIZARDING WIRELESS
-// ═══════════════════════════════════════════════════
-const dropZone=document.getElementById('dropZone');
-dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('drag-over');});
-dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over'));
-dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('drag-over');handleFiles(e.dataTransfer.files);});
-
-function handleFiles(files){
-  let added=0;
-  Array.from(files).forEach(f=>{
-    if(f.type.startsWith('audio/')||/\.(mp3|wav|ogg|flac|m4a|aac)$/i.test(f.name)){
-      tracks.push({name:f.name.replace(/\.[^.]+$/,''),url:URL.createObjectURL(f)}); added++;
-    }
-  });
-  if(added){ renderPlaylist(); showToast(`${added} track${added>1?'s':''} added to the Wireless`); if(currentTrackIndex===-1){currentTrackIndex=0;loadTrack(0);} }
-}
-
-function renderPlaylist(){
-  const pl=document.getElementById('playlist'),mc=document.getElementById('musicControls');
-  pl.innerHTML=''; mc.style.display=tracks.length?'flex':'none';
-  tracks.forEach((t,i)=>{
-    const d=document.createElement('div');
-    d.className='track-item'+(i===currentTrackIndex?' active':'');
-    d.innerHTML=`<span class="track-num">${i+1}</span><span class="track-name" title="${esc(t.name)}">${esc(t.name)}</span><button class="track-remove" onclick="removeTrack(${i},event)">×</button>`;
-    d.onclick=e=>{ if(!e.target.classList.contains('track-remove')) selectTrack(i); };
-    pl.appendChild(d);
-  });
-}
-
-function loadTrack(i){
-  if(i<0||i>=tracks.length) return;
-  currentTrackIndex=i; audio.src=tracks[i].url;
-  audio.volume=(settings.volume||70)/100; audio.loop=settings.loop||false;
-  document.getElementById('nowPlayingName').textContent=tracks[i].name;
-  renderPlaylist();
-}
-
-function selectTrack(i){ loadTrack(i); playAudio(); }
-function playAudio(){ if(currentTrackIndex===-1&&tracks.length>0)loadTrack(0); if(currentTrackIndex===-1)return; audio.play().then(()=>{isAudioPlaying=true;document.getElementById('playPauseBtn').textContent='⏸';}).catch(()=>{}); }
-function pauseAudio(){ audio.pause(); isAudioPlaying=false; document.getElementById('playPauseBtn').textContent='▶'; }
-function toggleMusicPlay(){ isAudioPlaying?pauseAudio():playAudio(); }
-function nextTrack(){ if(!tracks.length)return; loadTrack((currentTrackIndex+1)%tracks.length); if(isAudioPlaying)playAudio(); }
-function prevTrack(){ if(!tracks.length)return; loadTrack((currentTrackIndex-1+tracks.length)%tracks.length); if(isAudioPlaying)playAudio(); }
-function toggleLoop(){ settings.loop=!settings.loop; audio.loop=settings.loop; document.getElementById('loopBtn').classList.toggle('loop-on',settings.loop); LS.set('hp_settings',settings); }
-function setVolume(v){ settings.volume=parseInt(v); audio.volume=v/100; LS.set('hp_settings',settings); }
-function removeTrack(i,e){
-  e.stopPropagation(); URL.revokeObjectURL(tracks[i].url); tracks.splice(i,1);
-  if(currentTrackIndex===i){ pauseAudio(); currentTrackIndex=tracks.length>0?Math.min(i,tracks.length-1):-1; if(currentTrackIndex>=0)loadTrack(currentTrackIndex); }
-  else if(currentTrackIndex>i) currentTrackIndex--;
-  renderPlaylist();
-}
-audio.addEventListener('ended',()=>{
-  if(!settings.loop){
-    if(currentTrackIndex<tracks.length-1) nextTrack();
-    else{ isAudioPlaying=false; document.getElementById('playPauseBtn').textContent='▶'; }
-  }
-});
-
-// ═══════════════════════════════════════════════════
-// HISTORY / TOME
-// ═══════════════════════════════════════════════════
-function renderHistory(){ renderStats(); renderTable(); renderStreak(); renderGoal(); }
-function todayStr(){ return new Date().toISOString().split('T')[0]; }
-
-function renderStats(){
-  const today=todayStr(), weekAgo=new Date(Date.now()-7*86400000).toISOString();
-  const work=history.filter(h=>h.type==='work');
-  document.getElementById('statToday').textContent=work.filter(h=>h.ts.startsWith(today)).length;
-  document.getElementById('statWeek').textContent=work.filter(h=>h.ts>=weekAgo).length;
-  document.getElementById('statTotal').textContent=work.length;
-  const mins=work.reduce((a,b)=>a+(b.minutes||25),0);
-  document.getElementById('statFocusTime').textContent=mins>=60?`${Math.floor(mins/60)}h${mins%60?mins%60+'m':''}`:mins+'m';
-}
-
-function renderTable(){
-  const tbody=document.getElementById('historyTableBody'), empty=document.getElementById('historyEmpty');
-  tbody.innerHTML='';
-  if(!history.length){ empty.style.display='block'; return; }
-  empty.style.display='none';
-  history.slice(0,50).forEach(h=>{
-    const d=new Date(h.ts); const tr=document.createElement('tr');
-    const badgeCls=h.type==='work'?'focus':h.type==='break'?'break':'custom';
-    tr.innerHTML=`
-      <td class="date-col">${d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}
-        <span style="color:var(--text-muted)">${d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</span>
-      </td>
-      <td><span class="badge ${badgeCls}">${esc(h.mode)}</span></td>
-      <td>${h.minutes||25} min</td>
-      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:italic" title="${esc(h.note||'')}">${h.note?esc(h.note):'<span style="color:var(--text-dim)">—</span>'}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function renderStreak(){
-  const workDays=[...new Set(history.filter(h=>h.type==='work').map(h=>h.ts.split('T')[0]))].sort();
-  const today=new Date(); today.setHours(0,0,0,0);
-  let streak=0, best=0, tmp=1;
-  for(let i=workDays.length-1;i>=0;i--){
-    const d=new Date(workDays[i]+'T00:00:00'), diff=Math.round((today-d)/86400000);
-    if(i===workDays.length-1&&diff>1) break;
-    if(i<workDays.length-1){ const prev=new Date(workDays[i+1]+'T00:00:00'); if(Math.round((prev-d)/86400000)>1) break; }
-    streak++;
-  }
-  for(let i=1;i<workDays.length;i++){
-    const a=new Date(workDays[i-1]+'T00:00:00'),b=new Date(workDays[i]+'T00:00:00');
-    Math.round((b-a)/86400000)===1?tmp++:tmp=1; if(tmp>best)best=tmp;
-  }
-  if(streak>best) best=streak;
-  document.getElementById('streakNum').textContent=streak;
-  document.getElementById('streakBest').textContent=best||streak;
-  const cal=document.getElementById('miniCal'); cal.innerHTML='';
-  const today2=new Date().toISOString().split('T')[0];
-  for(let i=34;i>=0;i--){
-    const ds=new Date(Date.now()-i*86400000).toISOString().split('T')[0];
-    const div=document.createElement('div');
-    div.className='cal-day'+(workDays.includes(ds)?' has-session':'')+(ds===today2?' today':'');
-    div.title=ds; cal.appendChild(div);
-  }
-}
-
-function renderGoal(){
-  const goal=parseInt(settings.goal)||8;
-  const done=history.filter(h=>h.ts.startsWith(todayStr())&&h.type==='work').length;
-  document.getElementById('goalFill').style.width=Math.min(100,Math.round(done/goal*100))+'%';
-  document.getElementById('goalTarget').textContent=goal;
-  document.getElementById('goalText').innerHTML=`<span style="color:var(--parchment)">${done}</span> of <span id="goalTarget">${goal}</span> spells cast today${done>=goal?' 🏆':''}`;
-}
-
-function exportCSV(){
-  if(!history.length){ showToast('The tome is empty'); return; }
-  const rows=[['Date','Time','Spell','Type','Duration (min)','House','Note']];
-  history.forEach(h=>{
-    const d=new Date(h.ts);
-    rows.push([d.toLocaleDateString('en-GB'),d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),h.mode,h.type,h.minutes||25,h.house||'',`"${(h.note||'').replace(/"/g,'""')}"`]);
-  });
-  const a=document.createElement('a');
-  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(rows.map(r=>r.join(',')).join('\n'));
-  a.download='hogwarts-tome-'+todayStr()+'.csv';
-  a.click(); showToast('Tome exported!');
-}
-
-// ═══════════════════════════════════════════════════
-// KEYBOARD SHORTCUTS
-// ═══════════════════════════════════════════════════
-document.addEventListener('keydown',e=>{
-  if(['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
-  if(e.code==='Space'){e.preventDefault();toggleTimer();}
-  if(e.code==='KeyR'){e.preventDefault();resetTimer();}
-  if(e.code==='KeyS'){e.preventDefault();skipSession();}
-});
-
-// ═══════════════════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════════════════
-function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  clearTimeout(toastTmr);
-  toastTmr=setTimeout(()=>t.classList.remove('show'),2600);
-}
-
-// ═══════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════
-buildModes();
-renderModeTabs();
-renderModesList();
-loadSettings();
-renderSessionDots();
-updateSessionCount();
-selectMode('focus');
-renderTasks();
-renderPlaylist();
-const savedNote=LS.get('hp_session_note','');
-if(savedNote) document.getElementById('sessionNote').value=savedNote;
-</script>
+    <script>
+        // Simple animation for status indicator
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusIndicator = document.getElementById('status-indicator');
+            statusIndicator.classList.add('pulse');
+            
+            // Add hover effect for status text
+            statusIndicator.addEventListener('mouseenter', function() {
+                this.querySelector('.status-text').style.opacity = '1';
+            });
+            
+            // Add hover effect for status text
+            statusIndicator.addEventListener('mouseleave', function() {
+                this.querySelector('.status-text').style.opacity = '0';
+            });
+            
+            // Add subtle hover effect to cards
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-3px)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
 </body>
 </html>
