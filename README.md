@@ -1,4 +1,3 @@
-```markdown
 <div align="center">
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,15,20&height=180&section=header&text=🍅%20Pomodoro%20Timer&fontSize=42&fontColor=fff&animation=twinkling&fontAlignY=32&desc=Focus.%20Break.%20Repeat.&descAlignY=52&descSize=18" width="100%"/>
@@ -163,6 +162,3 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <sub>⭐ If you find this project useful, consider giving it a star!</sub>
 
 </div>
-```
-
-***
